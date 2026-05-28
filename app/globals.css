@@ -1,0 +1,412 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================================
+   RetrOase — Design System CSS Variables
+   ============================================================ */
+
+/* Light Mode (default) */
+:root {
+  --background: #ffffff;
+  --background-rgb: 255 255 255;
+  --surface: #ffffff;
+  --surface-hover: #f5f5f5;
+  --accent-orange: #ff6b35;
+  --accent-yellow: #ffcc02;
+  --accent-green: #39ff14;
+  --text-primary: #111111;
+  --text-secondary: #555555;
+  --border: #e5e5e5;
+  --success: #16a34a;
+  --warning: #d97706;
+  --error: #dc2626;
+
+  --font-press-start: "Press Start 2P", monospace;
+  --font-inter: "Inter", sans-serif;
+  --font-jetbrains: "JetBrains Mono", monospace;
+
+  --pixel-size: 2px;
+  --card-border: 2px solid var(--border);
+}
+
+/* Dark Mode */
+.dark {
+  --background: #050505;
+  --background-rgb: 5 5 5;
+  --surface: #111111;
+  --surface-hover: #1a1a1a;
+  --text-primary: #ffffff;
+  --text-secondary: #b5b5b5;
+  --border: #2a2a2a;
+  --success: #00ff88;
+  --warning: #ffaa00;
+  --error: #ff4444;
+}
+
+/* ============================================================
+   Basis-Reset & Body
+   ============================================================ */
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    background-color: var(--background);
+    color: var(--text-primary);
+  }
+
+  body {
+    background-color: var(--background);
+    color: var(--text-primary);
+    font-family: var(--font-inter), sans-serif;
+    line-height: 1.6;
+    overflow-x: hidden;
+    /* Pixel-Cursor */
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Crect x='0' y='0' width='8' height='8' fill='%23ff6b35'/%3E%3Crect x='8' y='8' width='8' height='8' fill='%23ff6b35'/%3E%3C/svg%3E") 4 4, crosshair;
+  }
+
+  /* Headings mit Pixel-Font */
+  h1, h2, h3 {
+    font-family: var(--font-press-start), monospace;
+    line-height: 1.4;
+    letter-spacing: -0.02em;
+  }
+
+  h4, h5, h6 {
+    font-family: var(--font-inter), sans-serif;
+    font-weight: 700;
+  }
+
+  /* Preise & Codes */
+  code, .price, .mono {
+    font-family: var(--font-jetbrains), monospace;
+  }
+
+  /* Fokus-Ring im Pixel-Stil */
+  :focus-visible {
+    outline: 2px solid var(--accent-orange);
+    outline-offset: 2px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--surface);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--accent-orange);
+    border-radius: 0;
+  }
+}
+
+/* ============================================================
+   Wiederverwendbare Komponenten
+   ============================================================ */
+@layer components {
+
+  /* Pixel-Card */
+  .pixel-card {
+    @apply bg-surface border-2 border-border rounded-none relative;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .pixel-card:hover {
+    @apply border-accent-orange;
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0 var(--accent-orange);
+  }
+
+  /* Primärer Button */
+  .btn-primary {
+    @apply font-pixel text-xs bg-accent-orange text-background px-6 py-3 border-2 border-accent-orange;
+    @apply transition-all duration-150 min-h-[44px] inline-flex items-center justify-center gap-2;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+  .btn-primary:hover {
+    @apply bg-transparent text-accent-orange;
+    box-shadow: 4px 4px 0 var(--accent-orange);
+    transform: translate(-2px, -2px);
+  }
+
+  /* Sekundärer Button */
+  .btn-secondary {
+    @apply font-pixel text-xs bg-transparent text-text-secondary px-6 py-3 border-2 border-border;
+    @apply transition-all duration-150 min-h-[44px] inline-flex items-center justify-center gap-2;
+    font-size: 0.6rem;
+    letter-spacing: 0.05em;
+  }
+  .btn-secondary:hover {
+    @apply border-accent-yellow text-accent-yellow;
+    box-shadow: 4px 4px 0 var(--accent-yellow);
+    transform: translate(-2px, -2px);
+  }
+
+  /* Neon-Badge */
+  .badge {
+    @apply font-pixel text-background px-2 py-1 text-xs inline-block;
+    font-size: 0.5rem;
+  }
+  .badge-new    { @apply bg-accent-green text-background; }
+  .badge-rare   { @apply bg-accent-yellow text-background; }
+  .badge-top    { @apply bg-success text-background; }
+  .badge-deal   { @apply bg-error text-background; }
+
+  /* Pixel-Section-Header */
+  .section-header {
+    @apply font-pixel text-text-primary mb-2;
+    font-size: clamp(0.7rem, 2vw, 1rem);
+    line-height: 1.8;
+  }
+
+  /* Pixel-Divider */
+  .pixel-divider {
+    @apply w-full h-px bg-border my-8;
+    background: repeating-linear-gradient(
+      90deg,
+      var(--border) 0px,
+      var(--border) 4px,
+      transparent 4px,
+      transparent 8px
+    );
+  }
+
+  /* Preisanzeige */
+  .price-tag {
+    @apply font-mono text-accent-orange font-bold;
+    font-size: clamp(1.2rem, 3vw, 1.8rem);
+  }
+
+  /* Input-Felder */
+  .pixel-input {
+    @apply w-full bg-surface border-2 border-border text-text-primary px-4 py-3;
+    @apply font-sans text-sm transition-all duration-150 min-h-[44px];
+    outline: none;
+  }
+  .pixel-input:focus {
+    @apply border-accent-orange;
+    box-shadow: 0 0 0 1px var(--accent-orange);
+  }
+  .pixel-input::placeholder {
+    @apply text-text-secondary;
+  }
+
+  /* Label */
+  .pixel-label {
+    @apply font-pixel text-text-secondary mb-2 block;
+    font-size: 0.55rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Zustand-Indicator */
+  .condition-sehr-gut  { @apply text-success; }
+  .condition-gut       { @apply text-accent-yellow; }
+  .condition-akzeptabel { @apply text-warning; }
+
+  /* Skeleton Loader */
+  .skeleton {
+    @apply bg-surface-hover animate-pulse;
+    background: linear-gradient(
+      90deg,
+      var(--surface) 25%,
+      var(--surface-hover) 50%,
+      var(--surface) 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-wave 1.5s ease-in-out infinite;
+  }
+
+  /* Toast */
+  .toast {
+    @apply fixed right-4 z-50 max-w-sm w-full;
+    @apply bg-surface border-2 border-border p-4;
+    @apply font-sans text-sm text-text-primary;
+  }
+}
+
+/* ============================================================
+   Utilities
+   ============================================================ */
+@layer utilities {
+  /* Scanline-Overlay für Hero */
+  .scanlines {
+    position: relative;
+    overflow: hidden;
+  }
+  .scanlines::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.15) 2px,
+      rgba(0, 0, 0, 0.15) 4px
+    );
+    pointer-events: none;
+    z-index: 1;
+  }
+
+  /* CRT-Vignette */
+  .crt-vignette {
+    position: relative;
+  }
+  .crt-vignette::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse at center,
+      transparent 60%,
+      rgba(0, 0, 0, 0.7) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Neon-Text */
+  .neon-text-orange {
+    text-shadow: 0 0 7px #ff6b35, 0 0 10px #ff6b35, 0 0 21px #ff6b35;
+  }
+  .neon-text-yellow {
+    text-shadow: 0 0 7px #ffcc02, 0 0 10px #ffcc02, 0 0 21px #ffcc02;
+  }
+  .neon-text-green {
+    text-shadow: 0 0 7px #39ff14, 0 0 10px #39ff14, 0 0 21px #39ff14;
+  }
+
+  /* Pixel-Border-Raster */
+  .pixel-border {
+    border: var(--pixel-size) solid var(--border);
+    image-rendering: pixelated;
+  }
+
+  /* Versteckter Ticker-Container */
+  .ticker-track {
+    display: flex;
+    white-space: nowrap;
+    animation: ticker 30s linear infinite;
+  }
+
+  /* Fade-In beim Scrollen */
+  .scroll-fade {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .scroll-fade.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Text-Balance */
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Pixel-Gradient */
+  .gradient-orange {
+    background: linear-gradient(135deg, var(--accent-orange), #ff9a3c);
+  }
+  .gradient-dark {
+    background: linear-gradient(180deg, var(--background) 0%, var(--surface) 100%);
+  }
+}
+
+/* ============================================================
+   Animationen
+   ============================================================ */
+@keyframes skeleton-wave {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+@keyframes glitch {
+  0%, 100% { transform: translate(0); }
+  10%  { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+  20%  { transform: translate(2px, -2px); filter: hue-rotate(-90deg); }
+  30%  { transform: translate(0); }
+  40%  { transform: translate(-1px, 1px); opacity: 0.8; }
+  50%  { transform: translate(1px, -1px); opacity: 1; }
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  33%  { transform: translateY(-15px) rotate(5deg); }
+  66%  { transform: translateY(-8px) rotate(-3deg); }
+}
+
+@keyframes ticker {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@keyframes pulse-neon {
+  0%, 100% { box-shadow: 0 0 5px #ff6b35, 0 0 10px #ff6b35; }
+  50%  { box-shadow: 0 0 20px #ff6b35, 0 0 40px #ff6b35, 0 0 60px #ff6b35; }
+}
+
+@keyframes pixel-blink {
+  0%, 100% { opacity: 1; }
+  50%  { opacity: 0; }
+}
+
+@keyframes fade-in {
+  0%   { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-up {
+  0%   { opacity: 0; transform: translateY(20px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes pixel-load {
+  0%   { width: 0%; }
+  100% { width: 100%; }
+}
+
+/* Pixel-Ladebalken */
+.pixel-progress {
+  width: 100%;
+  height: 8px;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  overflow: hidden;
+}
+.pixel-progress-bar {
+  height: 100%;
+  background: var(--accent-orange);
+  animation: pixel-load 2s ease-in-out forwards;
+  image-rendering: pixelated;
+}
+
+/* ============================================================
+   Mobile-spezifische Anpassungen
+   ============================================================ */
+@media (max-width: 640px) {
+  h1, h2, h3 {
+    font-size: clamp(0.65rem, 4vw, 0.85rem);
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    font-size: 0.5rem;
+    padding: 0.75rem 1rem;
+  }
+}
+
+/* Entfernt den Pixel-Cursor auf Touch-Geräten */
+@media (hover: none) {
+  body {
+    cursor: auto;
+  }
+}
