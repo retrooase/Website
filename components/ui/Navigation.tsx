@@ -7,12 +7,14 @@ import { Menu, X, Search, Heart, User, ShoppingBag } from "lucide-react";
 import { SITE, NAV_LINKS } from "@/lib/constants";
 import { clsx } from "clsx";
 import { ThemeToggle } from "./ThemeToggle";
+import { useWishlistHybrid } from "@/lib/hooks/useWishlistHybrid";
 
 export function Navigation() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const pathname = usePathname();
+  const { count: wishlistCount, isLoaded: wishlistLoaded } = useWishlistHybrid();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -112,6 +114,11 @@ export function Navigation() {
                 aria-label="Wunschliste"
               >
                 <Heart size={20} />
+                {wishlistLoaded && wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-error text-white font-sans text-[9px] font-bold flex items-center justify-center px-0.5 leading-none">
+                    {wishlistCount > 9 ? "9+" : wishlistCount}
+                  </span>
+                )}
               </Link>
 
               {/* Account */}
@@ -142,10 +149,15 @@ export function Navigation() {
               <ThemeToggle />
               <Link
                 href="/wunschliste"
-                className="p-2 text-text-secondary hover:text-error transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center"
+                className="p-2 text-text-secondary hover:text-error transition-colors min-h-[44px] min-w-[44px] flex items-center justify-center relative"
                 aria-label="Wunschliste"
               >
                 <Heart size={20} />
+                {wishlistLoaded && wishlistCount > 0 && (
+                  <span className="absolute top-1 right-1 min-w-[16px] h-4 bg-error text-white font-sans text-[9px] font-bold flex items-center justify-center px-0.5 leading-none">
+                    {wishlistCount > 9 ? "9+" : wishlistCount}
+                  </span>
+                )}
               </Link>
               <button
                 onClick={() => setIsMenuOpen(!isMenuOpen)}

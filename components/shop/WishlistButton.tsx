@@ -1,7 +1,7 @@
 "use client";
 
 import { Heart } from "lucide-react";
-import { useWishlist } from "@/lib/wishlist";
+import { useWishlistHybrid } from "@/lib/hooks/useWishlistHybrid";
 import { clsx } from "clsx";
 
 type Props = {
@@ -11,7 +11,7 @@ type Props = {
 };
 
 export function WishlistButton({ productId, size = "md", className }: Props) {
-  const { toggleWishlist, isInWishlist, isLoaded } = useWishlist();
+  const { toggleWishlist, isInWishlist, isLoaded } = useWishlistHybrid();
   const active = isLoaded && isInWishlist(productId);
 
   return (

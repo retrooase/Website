@@ -302,3 +302,31 @@ ALTER TABLE ankauf_requests
   ADD CONSTRAINT ankauf_requests_condition_check
   CHECK (condition IN ('Sehr Gut', 'Gut', 'Akzeptabel', 'Defekt'));
 */
+
+-- ============================================================
+-- PHASE 4 — Accounts & Alerts (2026-05-29)
+-- Ausführen in: Supabase Dashboard → SQL Editor
+-- ============================================================
+
+-- TABELLE: wishlist_items
+-- Nutzt product_id TEXT (z.B. "prod-001") — kompatibel mit JSON-Produktdaten
+CREATE TABLE IF NOT EXISTS wishlist_items (
+  id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id     UUID NOT NULL REFERENCES auth.users (id) ON DELETE CASCADE,
+  product_id  TEXT NOT NULL,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (user_id, product_id)
+);
+
+CREATE INDEX IF NOT EXISTS wishlist_items_user_idx ON wishlist_items (user_id);
+
+ALTER TABLE wishlist_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "wishlist_items_own" ON wishlist_items
+  FOR ALL USING (auth.uid() = user_id);
+
+-- MIGRATION: wishlist_alerts — Fehlende Felder ergänzen
+ALTER TABLE wishlist_alerts
+  ADD COLUMN IF NOT EXISTS platform   TEXT,
+  ADD COLUMN IF NOT EXISTS condition  TEXT
+    CHECK (condition IN ('Sehr Gut', 'Gut', 'Akzeptabel')),
+  ADD COLUMN IF NOT EXISTS max_price  NUMERIC(10, 2);
