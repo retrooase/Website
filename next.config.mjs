@@ -2,11 +2,11 @@
 const nextConfig = {
   images: {
     remotePatterns: [
-      // Supabase Storage
+      // Supabase Storage (public + signed URLs)
       {
         protocol: "https",
         hostname: "*.supabase.co",
-        pathname: "/storage/v1/object/public/**",
+        pathname: "/storage/v1/object/**",
       },
       // eBay-Bilder (für Sync)
       {
