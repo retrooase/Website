@@ -1,5 +1,12 @@
 import { NextResponse } from "next/server";
+import { Resend } from "resend";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import {
+  ankaufConfirmationHtml,
+  ankaufAdminHtml,
+  CONFIRMATION_SUBJECT,
+  adminSubject,
+} from "@/lib/email/ankauf";
 
 interface AnkaufBody {
   sellType?: string;
@@ -146,10 +153,10 @@ export async function POST(req: Request) {
 
   const requestId = inserted.id as string;
   let photoWarning: string | undefined;
+  const uploadedPaths: string[] = [];
 
   // Fotos hochladen
   if (photoFiles.length > 0) {
-    const uploadedPaths: string[] = [];
 
     for (let i = 0; i < photoFiles.length; i++) {
       const file = photoFiles[i];
@@ -189,9 +196,70 @@ export async function POST(req: Request) {
     }
   }
 
+  // E-Mails senden (Fehler dürfen die Anfrage nicht blockieren)
+  let emailWarning: string | undefined;
+  const FROM =
+    process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
+  const ADMIN = process.env.ADMIN_EMAIL ?? "eren@retroase.de";
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const requestDate = new Date().toISOString();
+
+    const emailResults = await Promise.allSettled([
+      resend.emails.send({
+        from: `RetrOase Ankauf <${FROM}>`,
+        to: body.email.trim().toLowerCase(),
+        subject: CONFIRMATION_SUBJECT,
+        html: ankaufConfirmationHtml({
+          id: requestId,
+          productName: body.productName!.trim(),
+          category: body.category?.trim() ?? "Sonstiges",
+          platform: body.platform?.trim() || null,
+          condition: body.condition!,
+          photoCount: uploadedPaths.length,
+          requestDate,
+        }),
+      }),
+      resend.emails.send({
+        from: `RetrOase System <${FROM}>`,
+        to: ADMIN,
+        subject: adminSubject(body.productName!.trim()),
+        html: ankaufAdminHtml({
+          requestId,
+          sellType: body.sellType ?? null,
+          name: body.name!.trim(),
+          email: body.email!.trim().toLowerCase(),
+          phone: body.phone?.trim() || null,
+          plz: body.plz?.trim() || null,
+          productName: body.productName!.trim(),
+          category: body.category?.trim() ?? "Sonstiges",
+          platform: body.platform?.trim() || null,
+          condition: body.condition!,
+          completeness: body.completeness || null,
+          description: body.description!.trim(),
+          desiredPrice: desiredPrice && !isNaN(desiredPrice) ? desiredPrice : null,
+          quantity,
+          imagePaths: uploadedPaths,
+          requestDate,
+        }),
+      }),
+    ]);
+
+    const allFailed = emailResults.every((r) => r.status === "rejected");
+    if (allFailed) {
+      emailWarning = "E-Mail-Benachrichtigung konnte nicht gesendet werden.";
+      console.error("[api/ankauf] Both emails failed:", emailResults);
+    }
+  } catch (err) {
+    emailWarning = "E-Mail-Benachrichtigung konnte nicht gesendet werden.";
+    console.error("[api/ankauf] Email error:", err);
+  }
+
   return NextResponse.json({
     success: true,
     id: requestId,
     ...(photoWarning && { photoWarning }),
+    ...(emailWarning && { emailWarning }),
   });
 }

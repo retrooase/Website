@@ -31,9 +31,9 @@ export function getRelatedProducts(product: Product, limit = 4): Product[] {
 }
 
 export function getCategories(): string[] {
-  return [...new Set(products.map((p) => p.category))];
+  return Array.from(new Set(products.map((p) => p.category)));
 }
 
 export function getPlatforms(): string[] {
-  return [...new Set(products.map((p) => p.platform))];
+  return Array.from(new Set(products.map((p) => p.platform)));
 }

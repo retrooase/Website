@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { ShoppingBag, Package, Truck, Shield, ChevronDown } from "lucide-react";
 import { getProductBySlug, getRelatedProducts, getAllProducts } from "@/lib/products";
 import { SITE, SHIPPING_INFO } from "@/lib/constants";

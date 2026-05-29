@@ -36,7 +36,7 @@ export function ImageGallery({ images, title }: Props) {
   function onTouchEnd(e: React.TouchEvent) {
     if (touchStart.current === null) return;
     const dx = e.changedTouches[0].clientX - touchStart.current;
-    if (Math.abs(dx) > 50) dx > 0 ? prev() : next();
+    if (Math.abs(dx) > 50) { if (dx > 0) prev(); else next(); }
     touchStart.current = null;
   }
 

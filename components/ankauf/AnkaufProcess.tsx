@@ -11,7 +11,7 @@ const STEPS = [
     emoji: "📷",
     title: "Fotos hochladen",
     desc: "Zeig uns den Zustand per Bild. Je genauer das Foto, desto präziser unser Angebot.",
-    note: "Foto-Upload folgt in Kürze",
+    note: null,
   },
   {
     number: "03",

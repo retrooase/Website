@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { ChevronLeft, ChevronRight, ArrowRight, CheckCircle, Loader2 } from "lucide-react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight, ArrowRight, CheckCircle, Loader2, Copy, Check, ExternalLink } from "lucide-react";
+import { SITE } from "@/lib/constants";
 import { type WizardData, type WizardErrors } from "./types";
 import { WizardProgress } from "./WizardProgress";
 import { WizardStep1Type } from "./WizardStep1Type";
@@ -53,39 +55,147 @@ function validate(step: number, data: WizardData): WizardErrors {
   return e;
 }
 
+function CopyButton({ text }: { text: string }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={handleCopy}
+      title="Kopieren"
+      className="ml-2 inline-flex items-center justify-center w-6 h-6 border border-border text-text-secondary hover:border-accent-orange hover:text-accent-orange transition-colors flex-shrink-0"
+    >
+      {copied ? <Check size={11} /> : <Copy size={11} />}
+    </button>
+  );
+}
+
 function WizardSuccess({
   onReset,
+  requestId,
   photoWarning,
+  emailWarning,
 }: {
   onReset: () => void;
+  requestId: string | null;
   photoWarning?: string | null;
+  emailWarning?: string | null;
 }) {
+  const hasWarnings = photoWarning || emailWarning;
+
   return (
-    <div className="py-12 text-center">
-      <div className="w-16 h-16 bg-[rgba(255,107,53,0.10)] flex items-center justify-center mx-auto mb-6">
-        <CheckCircle size={32} className="text-accent-orange" />
+    <div className="py-10 px-6 lg:px-8">
+      {/* Icon + Titel */}
+      <div className="flex items-center gap-4 mb-6">
+        <div className="w-12 h-12 bg-[rgba(255,107,53,0.10)] flex items-center justify-center flex-shrink-0">
+          <CheckCircle size={24} className="text-accent-orange" />
+        </div>
+        <div>
+          <h3 className="font-sans font-bold text-text-primary text-xl leading-tight">
+            Anfrage eingegangen!
+          </h3>
+          <p className="font-sans text-xs text-text-secondary mt-0.5">
+            Wir melden uns innerhalb von 24 Stunden.
+          </p>
+        </div>
       </div>
-      <h3 className="font-sans font-bold text-text-primary text-xl mb-2">
-        Anfrage eingegangen!
-      </h3>
-      <p className="font-sans text-sm text-text-secondary max-w-sm mx-auto mb-3 leading-relaxed">
-        Wir melden uns innerhalb von 24 Stunden mit einem fairen Angebot per E-Mail.
-        Kein Druck — du entscheidest ob du annimmst.
-      </p>
-      {photoWarning ? (
-        <p className="font-sans text-xs text-amber-700 dark:text-amber-400 border border-amber-400/40 bg-amber-50/50 dark:bg-amber-400/5 px-4 py-2 inline-block mb-8">
-          {photoWarning}
-        </p>
-      ) : (
-        <p className="font-sans text-xs text-text-secondary border border-border bg-surface px-4 py-2 inline-block mb-8">
-          Deine Anfrage wurde gespeichert. E-Mail-Bestätigung folgt bald.
-        </p>
+
+      {/* Trennlinie */}
+      <div className="h-px bg-border mb-6" />
+
+      {/* Anfrage-ID */}
+      {requestId && (
+        <div className="mb-6">
+          <p className="font-sans text-xs font-semibold uppercase tracking-widest text-text-secondary mb-2">
+            Anfrage-ID
+          </p>
+          <div className="flex items-center bg-surface border border-border px-4 py-3">
+            <span className="font-mono text-xs text-text-primary flex-1 break-all">
+              {requestId.toUpperCase()}
+            </span>
+            <CopyButton text={requestId.toUpperCase()} />
+          </div>
+        </div>
       )}
-      <div>
+
+      {/* Info-Blöcke */}
+      <div className="grid sm:grid-cols-2 gap-3 mb-6">
+        <div className="border border-border bg-surface p-4">
+          <p className="font-sans text-xs font-semibold text-text-primary mb-1">
+            Angebot in 24h
+          </p>
+          <p className="font-sans text-xs text-text-secondary leading-relaxed">
+            Wir prüfen deine Anfrage und senden dir ein faires Angebot per E-Mail.
+          </p>
+        </div>
+        <div className="border border-border bg-surface p-4">
+          <p className="font-sans text-xs font-semibold text-text-primary mb-1">
+            100 % unverbindlich
+          </p>
+          <p className="font-sans text-xs text-text-secondary leading-relaxed">
+            Kein Kaufzwang. Du entscheidest, ob du das Angebot annimmst.
+          </p>
+        </div>
+      </div>
+
+      {/* Warnungen */}
+      {hasWarnings && (
+        <div className="mb-6 space-y-2">
+          {photoWarning && (
+            <p className="font-sans text-xs text-amber-700 dark:text-amber-400 border border-amber-400/40 bg-amber-50/50 dark:bg-amber-400/5 px-4 py-3">
+              {photoWarning}
+            </p>
+          )}
+          {emailWarning && (
+            <p className="font-sans text-xs text-amber-700 dark:text-amber-400 border border-amber-400/40 bg-amber-50/50 dark:bg-amber-400/5 px-4 py-3">
+              {emailWarning}
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* CTAs */}
+      <div className="flex flex-col sm:flex-row gap-3 mb-6">
+        {requestId && (
+          <Link
+            href={`/ankauf/status/${requestId}`}
+            className="flex items-center justify-center gap-2 bg-accent-orange text-background font-sans font-semibold text-sm px-5 py-3 hover:bg-[#e05a28] transition-colors min-h-[44px]"
+          >
+            Anfrage verfolgen
+            <ExternalLink size={14} />
+          </Link>
+        )}
+        <Link
+          href="/"
+          className="flex items-center justify-center gap-2 border border-border text-text-secondary font-sans font-semibold text-sm px-5 py-3 hover:border-accent-orange hover:text-accent-orange transition-colors min-h-[44px]"
+        >
+          Zur Startseite
+        </Link>
+        {SITE.whatsapp.length > 4 && (
+          <a
+            href={`https://wa.me/${SITE.whatsapp}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center justify-center gap-2 border border-border text-text-secondary font-sans font-semibold text-sm px-5 py-3 hover:border-green-500 hover:text-green-600 transition-colors min-h-[44px]"
+          >
+            WhatsApp
+          </a>
+        )}
+      </div>
+
+      {/* Reset */}
+      <div className="border-t border-border pt-4">
         <button
           type="button"
           onClick={onReset}
-          className="font-sans text-sm text-text-secondary hover:text-accent-orange transition-colors underline"
+          className="font-sans text-xs text-text-secondary hover:text-accent-orange transition-colors underline"
         >
           Neue Anfrage stellen
         </button>
@@ -102,6 +212,8 @@ export function AnkaufWizard() {
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [photoWarning, setPhotoWarning] = useState<string | null>(null);
+  const [emailWarning, setEmailWarning] = useState<string | null>(null);
+  const [requestId, setRequestId] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
 
   function scrollTop() {
@@ -142,6 +254,7 @@ export function AnkaufWizard() {
     setLoading(true);
     setSubmitError(null);
     setPhotoWarning(null);
+    setEmailWarning(null);
 
     try {
       const fd = new FormData();
@@ -176,6 +289,8 @@ export function AnkaufWizard() {
       }
 
       if (json.photoWarning) setPhotoWarning(json.photoWarning);
+      if (json.emailWarning) setEmailWarning(json.emailWarning);
+      if (json.id) setRequestId(json.id);
       setSubmitted(true);
       scrollTop();
     } catch {
@@ -192,8 +307,17 @@ export function AnkaufWizard() {
         className="bg-background border border-border shadow-[0_2px_16px_rgba(0,0,0,0.06)] dark:shadow-none"
       >
         <WizardSuccess
-          onReset={() => { setData(INITIAL); setStep(0); setSubmitted(false); setPhotoWarning(null); }}
+          onReset={() => {
+            setData(INITIAL);
+            setStep(0);
+            setSubmitted(false);
+            setPhotoWarning(null);
+            setEmailWarning(null);
+            setRequestId(null);
+          }}
+          requestId={requestId}
           photoWarning={photoWarning}
+          emailWarning={emailWarning}
         />
       </div>
     );
