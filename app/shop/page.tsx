@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
-import { getAllProducts, getPlatforms } from "@/lib/products";
+import { getAllProducts } from "@/lib/products";
 import { ShopClient } from "@/components/shop/ShopClient";
+
+export const revalidate = 60;
 
 type SearchParams = { q?: string; category?: string };
 
@@ -17,40 +19,37 @@ export async function generateMetadata({
   };
 }
 
-export default function ShopPage({ searchParams }: { searchParams: SearchParams }) {
-  const products = getAllProducts();
-  const platforms = getPlatforms();
+export default async function ShopPage({ searchParams }: { searchParams: SearchParams }) {
+  const products = await getAllProducts();
+  const platforms = Array.from(new Set(products.map((p) => p.platform).filter((p): p is string => Boolean(p))));
 
   return (
     <>
       {/* Page-Header */}
-      <div className="bg-surface border-b border-border pt-10 pb-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="bg-surface border-b border-border/60 pt-10 pb-8">
+        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
           <h1
-            className="font-pixel text-text-primary mb-3"
-            style={{ fontSize: "clamp(0.7rem, 2.5vw, 1rem)" }}
+            className="font-display font-bold text-text-primary mb-2 leading-tight"
+            style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}
           >
-            {searchParams.category ? `🗂️ ${searchParams.category}` : "🛒 Alle Produkte"}
+            {searchParams.category ? searchParams.category : "Alle Produkte"}
           </h1>
           <p className="font-sans text-sm text-text-secondary mb-5 max-w-lg">
             {searchParams.category
-              ? `Geprüfte Secondhand-Ware in der Kategorie ${searchParams.category} — direkt aus Deutschland.`
+              ? `Geprüfte Secondhand-Ware · ${searchParams.category} · direkt aus Deutschland.`
               : "Entdecke geprüfte Retro-Schätze — Konsolen, Spiele & Pokémon-Karten direkt aus Deutschland."}
           </p>
 
-          {/* Trust-Zeile */}
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="font-sans text-xs text-text-secondary flex items-center gap-1.5">
-              <span className="text-success font-bold">✓</span>
-              Geprüfte Secondhand-Ware
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
+            <span className="flex items-center gap-1.5 font-sans text-xs text-text-secondary">
+              <span className="text-accent-teal">✓</span>
+              Geprüfte Ware
             </span>
-            <span className="text-border hidden sm:inline" aria-hidden="true">·</span>
-            <span className="font-sans text-xs text-text-secondary">
-              🚚 Versand aus Deutschland
+            <span className="flex items-center gap-1.5 font-sans text-xs text-text-secondary">
+              🚚 Versand 1–2 Tage
             </span>
-            <span className="text-border hidden sm:inline" aria-hidden="true">·</span>
-            <span className="font-sans text-xs text-text-secondary">
-              🔒 Sicher bezahlen über eBay
+            <span className="flex items-center gap-1.5 font-sans text-xs text-text-secondary">
+              🔒 Sicher bezahlen
             </span>
           </div>
         </div>

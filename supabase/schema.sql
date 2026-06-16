@@ -330,3 +330,29 @@ ALTER TABLE wishlist_alerts
   ADD COLUMN IF NOT EXISTS condition  TEXT
     CHECK (condition IN ('Sehr Gut', 'Gut', 'Akzeptabel')),
   ADD COLUMN IF NOT EXISTS max_price  NUMERIC(10, 2);
+
+-- ============================================================
+-- PHASE 5 — Admin-Bereich vollständig (2026-05-29)
+-- Ausführen in: Supabase Dashboard → SQL Editor
+-- ============================================================
+
+-- Produkte: Einkaufspreis + EAN/Barcode
+ALTER TABLE products
+  ADD COLUMN IF NOT EXISTS purchase_price NUMERIC(10,2),
+  ADD COLUMN IF NOT EXISTS ean TEXT;
+
+-- Produkte: 'TOP DEAL' Badge erlauben
+ALTER TABLE products DROP CONSTRAINT IF EXISTS products_badge_check;
+ALTER TABLE products ADD CONSTRAINT products_badge_check
+  CHECK (badge IN ('NEU', 'SELTEN', 'TOP-ZUSTAND', 'SCHNÄPPCHEN', 'TOP DEAL'));
+
+-- Ankauf: EAN-Feld + erweiterte Admin-Labels
+ALTER TABLE ankauf_requests
+  ADD COLUMN IF NOT EXISTS ean TEXT;
+
+ALTER TABLE ankauf_requests DROP CONSTRAINT IF EXISTS ankauf_requests_admin_label_check;
+ALTER TABLE ankauf_requests ADD CONSTRAINT ankauf_requests_admin_label_check
+  CHECK (admin_label IN (
+    'Sehr gefragt', 'Gut verkäuflich', 'Schwer zu verkaufen',
+    'Zu beschädigt', 'Hohe Marge möglich', 'Selten prüfen'
+  ));

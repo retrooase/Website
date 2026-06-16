@@ -5,8 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
-import { getAllProducts } from "@/lib/products";
-import type { Product } from "@/lib/types";
+import type { Product } from "@/types";
 import { SITE } from "@/lib/constants";
 
 type Props = {
@@ -14,7 +13,7 @@ type Props = {
 };
 
 export function WishlistSection({ userId }: Props) {
-  const [productIds, setProductIds] = useState<string[]>([]);
+  const [wishlistProducts, setWishlistProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -22,8 +21,25 @@ export function WishlistSection({ userId }: Props) {
     supabase
       .from("wishlist_items")
       .select("product_id")
-      .then(({ data }) => {
-        setProductIds((data ?? []).map((r) => r.product_id as string));
+      .then(async ({ data: items }) => {
+        const ids = (items ?? []).map((r) => r.product_id as string);
+
+        if (ids.length === 0) {
+          setLoading(false);
+          return;
+        }
+
+        const { data: products } = await supabase
+          .from("products")
+          .select("*")
+          .in("id", ids);
+
+        const productMap = new Map(
+          (products ?? []).map((p) => [p.id, p as Product])
+        );
+        setWishlistProducts(
+          ids.map((id) => productMap.get(id)).filter((p): p is Product => !!p)
+        );
         setLoading(false);
       });
   }, [userId]);
@@ -34,9 +50,8 @@ export function WishlistSection({ userId }: Props) {
       .from("wishlist_items")
       .delete()
       .eq("product_id", productId);
-    setProductIds((prev) => prev.filter((id) => id !== productId));
+    setWishlistProducts((prev) => prev.filter((p) => p.id !== productId));
 
-    // localStorage sync
     try {
       const raw = localStorage.getItem("retroase_wishlist_v1");
       const local: string[] = raw ? JSON.parse(raw) : [];
@@ -46,11 +61,6 @@ export function WishlistSection({ userId }: Props) {
       );
     } catch {}
   }
-
-  const allProducts = getAllProducts();
-  const wishlistProducts = productIds
-    .map((id) => allProducts.find((p) => p.id === id))
-    .filter((p): p is Product => !!p);
 
   return (
     <section>
@@ -139,7 +149,6 @@ function WishlistCard({
         </div>
       </Link>
 
-      {/* Remove button */}
       <button
         onClick={() => onRemove(product.id)}
         className="absolute top-1.5 right-1.5 bg-background/80 p-1.5 opacity-0 group-hover:opacity-100 transition-opacity hover:text-error text-text-secondary"

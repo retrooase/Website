@@ -35,7 +35,7 @@ const nextConfig = {
     optimizePackageImports: ["lucide-react"],
   },
 
-  // Header für Sicherheit
+  // Header für Sicherheit & Caching
   async headers() {
     return [
       {
@@ -48,6 +48,27 @@ const nextConfig = {
             key: "Permissions-Policy",
             value: "camera=(), microphone=(), geolocation=()",
           },
+        ],
+      },
+      // Fonts & Icons: 1 Jahr im Browser cachen
+      {
+        source: "/_next/static/media/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // JS/CSS Chunks: immutable (Filename enthält Hash)
+      {
+        source: "/_next/static/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+        ],
+      },
+      // Bilder im /public Ordner: 7 Tage
+      {
+        source: "/images/(.*)",
+        headers: [
+          { key: "Cache-Control", value: "public, max-age=604800, stale-while-revalidate=86400" },
         ],
       },
     ];

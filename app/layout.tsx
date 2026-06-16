@@ -1,7 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Press_Start_2P, Inter, JetBrains_Mono } from "next/font/google";
+import { Syne, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navigation } from "@/components/ui/Navigation";
+import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
+import { isAdminUser } from "@/lib/admin";
 import { Footer } from "@/components/ui/Footer";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
@@ -9,11 +11,12 @@ import { BackToTop } from "@/components/ui/BackToTop";
 import { CookieBanner } from "@/components/ui/CookieBanner";
 import { ScrollFadeObserver } from "@/components/ui/ScrollFadeObserver";
 import { ThemeProvider } from "@/components/ui/ThemeProvider";
+import { Suspense } from "react";
 
-const pressStart2P = Press_Start_2P({
-  weight: "400",
+const syne = Syne({
+  weight: ["400", "600", "700", "800"],
   subsets: ["latin"],
-  variable: "--font-press-start",
+  variable: "--font-display",
   display: "swap",
 });
 
@@ -92,6 +95,30 @@ export const viewport: Viewport = {
   themeColor: "#050505",
 };
 
+async function NavWithAuth() {
+  let isAdmin = false;
+  try {
+    const supabase = await createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      if (isAdminUser(user.email)) {
+        isAdmin = true;
+      } else {
+        const adminClient = createAdminSupabaseClient();
+        const { data } = await adminClient
+          .from("user_profiles")
+          .select("is_admin")
+          .eq("id", user.id)
+          .single();
+        isAdmin = data?.is_admin === true;
+      }
+    }
+  } catch {
+    // Auth-Fehler ignorieren
+  }
+  return <Navigation isAdmin={isAdmin} />;
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -100,13 +127,21 @@ export default function RootLayout({
   return (
     <html
       lang="de"
-      className={`${pressStart2P.variable} ${inter.variable} ${jetbrainsMono.variable}`}
+      className={`dark ${syne.variable} ${inter.variable} ${jetbrainsMono.variable}`}
       suppressHydrationWarning
     >
       <body className="bg-background text-text-primary font-sans antialiased">
+        {/* Theme-FOUC-Prävention: Dark-Klasse vor React-Hydration setzen */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark')}catch(e){}`,
+          }}
+        />
         <ThemeProvider>
           <ToastProvider>
-            <Navigation />
+            <Suspense fallback={<Navigation isAdmin={false} />}>
+              <NavWithAuth />
+            </Suspense>
             <main>{children}</main>
             <Footer />
             <WhatsAppButton />

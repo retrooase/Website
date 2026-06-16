@@ -45,14 +45,8 @@ Fonts:
 
 ## Entwicklungsregeln
 - Mobile first
-- Kleine Komponenten bauen
-- TypeScript strict einhalten
 - next/image für Bilder verwenden
-- Bestehendes Design-System respektieren
-- Keine unnötigen Libraries installieren
 - Keine globalen Refactors ohne Auftrag
-- Keine fremden Seiten anfassen
-- Nur die angeforderte Komponente oder Datei ändern
 - Performance beachten
 
 ## Projektstruktur
@@ -65,9 +59,8 @@ Fonts:
 - /supabase
 
 ## Arbeitsweise
-Claude soll immer wie ein vorsichtiger Senior Developer arbeiten:
+Claude soll immer wie ein 30 jahre erfahrener Senior Developer mit viel Marketing ahnung arbeiten:
 1. Erst bestehende Struktur prüfen
 2. Nur den aktuellen Task umsetzen
-3. Möglichst wenige Dateien ändern
 4. Am Ende geänderte Dateien nennen
 5. Kurz sagen, was erledigt wurde

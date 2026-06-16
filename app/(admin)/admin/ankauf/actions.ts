@@ -1,17 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
-import { isAdminUser } from "@/lib/admin";
+import { redirect } from "next/navigation";
+import { createAdminSupabaseClient } from "@/lib/supabase/server";
+import { assertAdmin } from "@/lib/admin";
 import type { AnkaufStatus, AnkaufLabel } from "@/types";
-
-async function assertAdmin() {
-  const supabase = await createServerSupabaseClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user || !isAdminUser(user.email)) throw new Error("Unauthorized");
-}
 
 export async function updateAnkaufStatus(id: string, status: AnkaufStatus) {
   await assertAdmin();
@@ -23,6 +16,7 @@ export async function updateAnkaufStatus(id: string, status: AnkaufStatus) {
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/ankauf/${id}`);
   revalidatePath(`/ankauf/status/${id}`);
+  redirect(`/admin/ankauf/${id}?saved=1`);
 }
 
 export async function updateAnkaufAdmin(
@@ -42,4 +36,5 @@ export async function updateAnkaufAdmin(
     .eq("id", id);
   if (error) throw new Error(error.message);
   revalidatePath(`/admin/ankauf/${id}`);
+  redirect(`/admin/ankauf/${id}?saved=1`);
 }

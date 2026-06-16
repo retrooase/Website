@@ -10,7 +10,7 @@ export type ProductCategory =
   | "Pokémon"
   | "Zubehör"
   | "Retro";
-export type ProductBadge = "NEU" | "SELTEN" | "TOP-ZUSTAND" | "SCHNÄPPCHEN";
+export type ProductBadge = "NEU" | "SELTEN" | "TOP-ZUSTAND" | "SCHNÄPPCHEN" | "TOP DEAL";
 
 export interface Product {
   id: string;
@@ -27,13 +27,15 @@ export interface Product {
   is_sold: boolean;
   is_featured: boolean;
   badge?: ProductBadge;
+  purchase_price?: number;
+  ean?: string;
   created_at: string;
   // Technische Details (optional)
   language?: string;
   region?: string;
   release_year?: number;
   serial_number?: string;
-  includes?: string[]; // Lieferumfang
+  includes?: string[];
 }
 
 export type AnkaufStatus =
@@ -47,7 +49,9 @@ export type AnkaufLabel =
   | "Sehr gefragt"
   | "Gut verkäuflich"
   | "Schwer zu verkaufen"
-  | "Zu beschädigt";
+  | "Zu beschädigt"
+  | "Hohe Marge möglich"
+  | "Selten prüfen";
 
 export interface AnkaufRequest {
   id: string;
@@ -62,12 +66,13 @@ export interface AnkaufRequest {
   images: string[];
   desired_price?: number;
   quantity: number;
-  completeness: string[]; // OVP, Anleitung, etc.
+  completeness: string[];
   status: AnkaufStatus;
   offer_from?: number;
   offer_to?: number;
   admin_label?: AnkaufLabel;
   admin_comment?: string;
+  ean?: string;
   created_at: string;
 }
 
@@ -76,6 +81,9 @@ export interface WishlistAlert {
   user_id: string;
   search_query: string;
   category?: ProductCategory;
+  platform?: string;
+  condition?: string;
+  max_price?: number;
   is_active: boolean;
   created_at: string;
 }
@@ -96,6 +104,7 @@ export interface BlogPost {
   image?: string;
   category: "Guides" | "News" | "Sammlertipps" | "Produktvorstellungen";
   tags?: string[];
+  is_published: boolean;
   published_at?: string;
   created_at: string;
   read_time?: number;

@@ -26,12 +26,15 @@ const ALL_LABELS: AnkaufLabel[] = [
   "Gut verkäuflich",
   "Schwer zu verkaufen",
   "Zu beschädigt",
+  "Hohe Marge möglich",
+  "Selten prüfen",
 ];
 
-type PageProps = { params: Promise<{ id: string }> };
+type PageProps = { params: Promise<{ id: string }>; searchParams: Promise<{ saved?: string }> };
 
-export default async function AnkaufDetailPage({ params }: PageProps) {
+export default async function AnkaufDetailPage({ params, searchParams }: PageProps) {
   const { id } = await params;
+  const { saved } = await searchParams;
 
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
 
@@ -75,6 +78,12 @@ export default async function AnkaufDetailPage({ params }: PageProps) {
         <span className="text-border">/</span>
         <StatusBadge status={row.status as AnkaufStatus} />
       </div>
+
+      {saved === "1" && (
+        <div className="mb-5 px-4 py-3 bg-green-50 border border-green-200 dark:bg-green-900/20 dark:border-green-800">
+          <span className="text-green-600 dark:text-green-400 text-sm font-sans">Änderungen gespeichert.</span>
+        </div>
+      )}
 
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Linke Spalte: Details */}

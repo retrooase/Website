@@ -1,21 +1,23 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { ShoppingBag, Package, Truck, Shield, ChevronDown } from "lucide-react";
-import { getProductBySlug, getRelatedProducts, getAllProducts } from "@/lib/products";
+import { Package, Truck, Shield, ChevronDown } from "lucide-react";
+import { getProductBySlug, getRelatedProducts } from "@/lib/products";
 import { SITE, SHIPPING_INFO } from "@/lib/constants";
 import { ImageGallery } from "@/components/shop/ImageGallery";
 import { WishlistButton } from "@/components/shop/WishlistButton";
+import { BuyButton } from "@/components/shop/BuyButton";
+import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Breadcrumb } from "@/components/shop/Breadcrumb";
+import type { Product } from "@/types";
+
+export const revalidate = 60;
+export const dynamicParams = true;
 
 type Props = { params: { slug: string } };
 
-export async function generateStaticParams() {
-  return getAllProducts().map((p) => ({ slug: p.slug }));
-}
-
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const product = getProductBySlug(params.slug);
+  const product = await getProductBySlug(params.slug);
   if (!product) return { title: "Produkt nicht gefunden" };
   return {
     title: `${product.title} kaufen`,
@@ -39,11 +41,11 @@ const conditionDot: Record<string, string> = {
   Akzeptabel: "bg-warning",
 };
 
-export default function ProductDetailPage({ params }: Props) {
-  const product = getProductBySlug(params.slug);
+export default async function ProductDetailPage({ params }: Props) {
+  const product = await getProductBySlug(params.slug);
   if (!product) notFound();
 
-  const related = getRelatedProducts(product, 4);
+  const related = await getRelatedProducts(product, 4);
   const descLines = product.description.split("\n\n");
 
   return (
@@ -125,16 +127,17 @@ export default function ProductDetailPage({ params }: Props) {
 
           {/* CTA-Buttons */}
           <div className="flex flex-col sm:flex-row gap-3 pt-2">
-            <a
-              href={`${SITE.ebayShopUrl}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={`btn-primary flex-1 justify-center ${product.is_sold ? "opacity-50 pointer-events-none" : ""}`}
-              aria-disabled={product.is_sold}
-            >
-              <ShoppingBag size={16} />
-              {product.is_sold ? "Verkauft" : "Auf eBay kaufen"}
-            </a>
+            <BuyButton productId={product.id} isSold={product.is_sold} />
+            <AddToCartButton
+              product={{
+                productId: product.id,
+                title: product.title,
+                price: product.price,
+                image: product.images?.[0],
+                slug: product.slug,
+              }}
+              isSold={product.is_sold}
+            />
             <WishlistButton productId={product.id} size="md" className="border-2 border-border hover:border-error" />
           </div>
 
@@ -201,11 +204,9 @@ function TechDetails({
   product,
   descLines,
 }: {
-  product: ReturnType<typeof getProductBySlug>;
+  product: Product;
   descLines: string[];
 }) {
-  if (!product) return null;
-
   return (
     <details className="group border-2 border-border">
       <summary className="flex items-center justify-between p-4 cursor-pointer list-none select-none hover:bg-surface-hover transition-colors">
