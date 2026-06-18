@@ -1,32 +1,43 @@
 import type { Metadata } from "next";
 import { SITE } from "@/lib/constants";
-import { AnkaufHero } from "@/components/ankauf/AnkaufHero";
-import { AnkaufCategories } from "@/components/ankauf/AnkaufCategories";
-import { AnkaufPriceWidget } from "@/components/ankauf/AnkaufPriceWidget";
-import { AnkaufBarcodeCard } from "@/components/ankauf/AnkaufBarcodeCard";
-import { AnkaufProcess } from "@/components/ankauf/AnkaufProcess";
-import { AnkaufTrust } from "@/components/ankauf/AnkaufTrust";
+import { AnkaufHeroV2 } from "@/components/ankauf/v2/hero/AnkaufHeroV2";
+import { Section1Value } from "@/components/ankauf/v2/scroll/Section1Value";
+import { Section2Psychology } from "@/components/ankauf/v2/scroll/Section2Psychology";
+import { Section3Ticker } from "@/components/ankauf/v2/scroll/Section3Ticker";
+import { Section4Steps } from "@/components/ankauf/v2/scroll/Section4Steps";
+import { Section5Trust } from "@/components/ankauf/v2/scroll/Section5Trust";
+import { Section6Fomo } from "@/components/ankauf/v2/scroll/Section6Fomo";
+import { AnkaufPriceToolV2 } from "@/components/ankauf/v2/price/AnkaufPriceToolV2";
 import { AnkaufFAQ } from "@/components/ankauf/AnkaufFAQ";
 import { AnkaufWizard } from "@/components/ankauf/wizard/AnkaufWizard";
 
 export const metadata: Metadata = {
-  title: "Ankauf — Retro-Gear verkaufen | RetrOase",
+  title: "Ankauf - Retro-Gear verkaufen | RetrOase",
   description:
-    "Verkauf deine Konsolen, Spiele, Pokémon-Karten und ganze Sammlungen. Faire Preise, schnelle Auszahlung, kostenloses Versandlabel — direkt aus Deutschland.",
+    "Verkauf deine Konsolen, Spiele, Pokémon-Karten und ganze Sammlungen. Faire Preise, schnelle Auszahlung, kostenloses Versandlabel - direkt aus Deutschland.",
 };
 
 export default function AnkaufPage() {
   return (
     <>
-      {/* 1. Hero */}
-      <AnkaufHero />
+      {/* 1. Hero - Ankauf V2 / VAULT-Erlebnis */}
+      <AnkaufHeroV2 />
 
-      {/* 2. Was möchtest du verkaufen? */}
-      <AnkaufCategories />
+      {/* 2. Was ist dein Zeug wert? */}
+      <Section1Value />
 
-      {/* 3. Preisschätzer + Barcode Scanner */}
+      {/* 3. Psychologie-Trigger */}
+      <Section2Psychology />
+
+      {/* 4. Live-Ankauf-Ticker */}
+      <Section3Ticker />
+
+      {/* 5. So einfach geht's */}
+      <Section4Steps />
+
+      {/* 6. Preistool V2 */}
       <section
-        className="py-20 sm:py-28 bg-surface scroll-fade"
+        className="ak-stage ak-tool-section scroll-fade"
         id="preisschaetzer"
       >
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,31 +49,28 @@ export default function AnkaufPage() {
               className="font-sans font-bold text-text-primary"
               style={{ fontSize: "clamp(1.5rem, 2.5vw, 2.25rem)" }}
             >
-              Preis schätzen & Produkt erkennen
+              Preis schätzen & Paketwert sehen
             </h2>
             <p className="font-sans text-sm text-text-secondary mt-2 max-w-lg mx-auto">
-              Nutze den Preisschätzer für einen Richtwert — oder scann direkt den Barcode
-              deines Produkts.
+              Erfasse Konsolen, Spiele, Karten und Zubehör einzeln. Der Rechner zeigt dir
+              sofort den geschätzten Gesamtwert.
             </p>
           </div>
 
-          <div className="grid lg:grid-cols-2 gap-6 lg:gap-8 items-start">
-            <AnkaufPriceWidget />
-            <AnkaufBarcodeCard />
-          </div>
+          <AnkaufPriceToolV2 />
         </div>
       </section>
 
-      {/* 4. Ablauf in 3 Schritten */}
-      <AnkaufProcess />
+      {/* 7. Vertrauen & Beweise */}
+      <Section5Trust />
 
-      {/* 5. Vertrauensbereich */}
-      <AnkaufTrust />
+      {/* 8. FOMO & Dringlichkeit */}
+      <Section6Fomo />
 
-      {/* 6. FAQ */}
+      {/* 9. FAQ */}
       <AnkaufFAQ />
 
-      {/* 7. Ankauf-Wizard */}
+      {/* 10. Ankauf-Wizard */}
       <section
         className="py-20 sm:py-28 bg-surface scroll-fade"
         id="angebot"
@@ -80,7 +88,7 @@ export default function AnkaufPage() {
             </h2>
             <p className="font-sans text-sm text-text-secondary mt-2 max-w-lg mx-auto">
               In 5 kurzen Schritten zur unverbindlichen Anfrage.
-              Kein Druck — du entscheidest ob du annimmst.
+              Kein Druck - du entscheidest ob du annimmst.
             </p>
           </div>
 

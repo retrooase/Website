@@ -21,7 +21,7 @@ export function BackToTop() {
     <button
       onClick={scrollToTop}
       className={clsx(
-        "fixed bottom-24 right-6 z-40 w-12 h-12 bg-surface border-2 border-border",
+        "fixed bottom-[calc(5.75rem+env(safe-area-inset-bottom))] right-[4.75rem] z-50 w-11 h-11 bg-surface border-2 border-border md:bottom-24 md:right-6 md:w-12 md:h-12",
         "flex items-center justify-center text-text-secondary",
         "hover:border-accent-orange hover:text-accent-orange transition-all duration-200",
         "hover:shadow-pixel-orange",

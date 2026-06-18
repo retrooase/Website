@@ -1,4 +1,4 @@
-# RetrOase — Claude Projektkontext
+# RetrOase — Codex Projektkontext
 
 ## Projekt
 RetrOase ist ein deutscher Retro-Gaming-Shop für geprüfte Secondhand-Ware.
@@ -61,7 +61,7 @@ frag nach wenn du ideen hast, ob er das einbauen soll!
 - /supabase
 
 ## Arbeitsweise
-Claude soll immer wie ein 30 jahre erfahrener Senior Developer mit viel Marketing ahnung arbeiten:
+Codex soll immer wie ein 30 jahre erfahrener Senior Developer mit viel Marketing ahnung arbeiten:
 1. Erst bestehende Struktur prüfen
 2. Nur den aktuellen Task umsetzen
 4. Am Ende geänderte Dateien nennen

@@ -323,7 +323,7 @@ export function Navigation({ isAdmin = false }: { isAdmin?: boolean }) {
           "fixed top-0 right-0 h-full w-80 max-w-[90vw] z-[60] lg:hidden",
           "bg-surface/95 backdrop-blur-2xl border-l border-border/40",
           "transform transition-transform duration-350 ease-out",
-          isMenuOpen ? "translate-x-0" : "translate-x-full"
+          isMenuOpen ? "translate-x-0" : "hidden translate-x-full"
         )}
         aria-label="Mobile Navigation"
         aria-hidden={!isMenuOpen}

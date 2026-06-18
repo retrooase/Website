@@ -8,12 +8,12 @@ const nextConfig = {
         hostname: "*.supabase.co",
         pathname: "/storage/v1/object/**",
       },
-      // eBay-Bilder (für Sync)
+      // eBay images
       {
         protocol: "https",
         hostname: "i.ebayimg.com",
       },
-      // Platzhalter-Bilder
+      // Placeholder images
       {
         protocol: "https",
         hostname: "placehold.co",
@@ -24,19 +24,32 @@ const nextConfig = {
     imageSizes: [16, 32, 48, 64, 96, 128, 256],
   },
 
-  // Komprimierung aktivieren
   compress: true,
-
-  // Trailing Slash für SEO
   trailingSlash: false,
 
-  // Experimentelle Features (Next.js 14)
   experimental: {
     optimizePackageImports: ["lucide-react"],
   },
 
-  // Header für Sicherheit & Caching
   async headers() {
+    const staticCacheHeaders =
+      process.env.NODE_ENV === "production"
+        ? [
+            {
+              source: "/_next/static/media/(.*)",
+              headers: [
+                { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+              ],
+            },
+            {
+              source: "/_next/static/(.*)",
+              headers: [
+                { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
+              ],
+            },
+          ]
+        : [];
+
     return [
       {
         source: "/(.*)",
@@ -50,21 +63,7 @@ const nextConfig = {
           },
         ],
       },
-      // Fonts & Icons: 1 Jahr im Browser cachen
-      {
-        source: "/_next/static/media/(.*)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // JS/CSS Chunks: immutable (Filename enthält Hash)
-      {
-        source: "/_next/static/(.*)",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      // Bilder im /public Ordner: 7 Tage
+      ...staticCacheHeaders,
       {
         source: "/images/(.*)",
         headers: [
