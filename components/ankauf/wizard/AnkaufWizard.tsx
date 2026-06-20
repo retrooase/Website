@@ -1,10 +1,21 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, ArrowRight, CheckCircle, Loader2, Copy, Check, ExternalLink } from "lucide-react";
+import {
+  ArrowRight,
+  Check,
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  ExternalLink,
+  Loader2,
+  PackageCheck,
+  X,
+} from "lucide-react";
 import { SITE } from "@/lib/constants";
-import { type WizardData, type WizardErrors } from "./types";
+import { type SellType, type WizardData, type WizardErrors } from "./types";
 import { WizardProgress } from "./WizardProgress";
 import { WizardStep1Type } from "./WizardStep1Type";
 import { WizardStep2Contact } from "./WizardStep2Contact";
@@ -30,6 +41,194 @@ const INITIAL: WizardData = {
   acceptTerms: false,
   acceptPrivacy: false,
 };
+
+const PRICE_TOOL_STORAGE_KEY = "retroase_price_tool_items";
+
+type PriceToolItem = {
+  name?: string;
+  brand?: string;
+  family?: string;
+  quantity?: number;
+  condition?: string;
+  completeness?: string;
+  range?: [number, number];
+};
+
+type PriceToolImportPayload = {
+  version?: number;
+  source?: string;
+  savedAt?: number;
+  items?: unknown;
+};
+
+type PrefillSummary = {
+  count: number;
+  label: string;
+  rangeLabel: string | null;
+};
+
+const PRICE_TOOL_IMPORT_MAX_AGE_MS = 20 * 60 * 1000;
+
+function formatEuro(value: number) {
+  return `${Math.round(value).toLocaleString("de-DE")} €`;
+}
+
+function isPriceToolItem(value: unknown): value is PriceToolItem {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.name === "string" || typeof item.brand === "string" || typeof item.family === "string";
+}
+
+function readPriceToolImport(): PriceToolItem[] {
+  const raw = localStorage.getItem(PRICE_TOOL_STORAGE_KEY);
+  if (!raw) return [];
+
+  const parsed = JSON.parse(raw) as PriceToolImportPayload | unknown[];
+
+  // Alte Builds speicherten nur ein Array. Diese Daten koennen stale sein und werden
+  // bewusst entfernt, damit nicht alte Pakete in neue Anfragen rutschen.
+  if (Array.isArray(parsed)) {
+    localStorage.removeItem(PRICE_TOOL_STORAGE_KEY);
+    return [];
+  }
+
+  if (!parsed || typeof parsed !== "object") return [];
+  const payload = parsed as PriceToolImportPayload;
+  if (
+    payload.version !== 2 ||
+    payload.source !== "ankauf-price-tool-v2" ||
+    typeof payload.savedAt !== "number" ||
+    !Array.isArray(payload.items)
+  ) {
+    localStorage.removeItem(PRICE_TOOL_STORAGE_KEY);
+    return [];
+  }
+
+  const isFresh = Date.now() - payload.savedAt <= PRICE_TOOL_IMPORT_MAX_AGE_MS;
+  if (!isFresh) {
+    localStorage.removeItem(PRICE_TOOL_STORAGE_KEY);
+    return [];
+  }
+
+  return payload.items.filter(isPriceToolItem);
+}
+
+function normalizeText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ß/g, "ss");
+}
+
+function clampQuantity(value: unknown) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? Math.max(1, Math.min(9999, Math.round(parsed))) : 1;
+}
+
+function mapCondition(value: string | undefined) {
+  const normalized = normalizeText(value ?? "");
+  if (normalized.includes("sehr") || normalized.includes("mint")) return "Sehr Gut";
+  if (normalized.includes("defekt")) return "Defekt";
+  if (normalized.includes("akzept") || normalized.includes("fair")) return "Akzeptabel";
+  return "Gut";
+}
+
+function mapCompleteness(value: string | undefined) {
+  const normalized = normalizeText(value ?? "");
+  if (normalized.includes("ovp") || normalized.includes("boxed")) return "Vollständig (mit OVP)";
+  if (normalized.includes("komplett") || normalized.includes("complete")) return "Ohne OVP";
+  if (normalized.includes("nur") || normalized.includes("lose") || normalized.includes("unvoll")) {
+    return "Nur Gerät / kein Zubehör";
+  }
+  return "Nicht anwendbar";
+}
+
+function mapCategory(item: PriceToolItem) {
+  const text = normalizeText([item.brand, item.family, item.name].filter(Boolean).join(" "));
+  if (text.includes("pokemon")) return "Pokémon";
+  if (text.includes("game boy") || text.includes("gameboy")) return "Game Boy";
+  if (text.includes("sony") || text.includes("playstation") || text.includes("ps5") || text.includes("ps4")) {
+    return "PlayStation";
+  }
+  if (text.includes("zubehor") || text.includes("controller")) return "Zubehör";
+  if (text.includes("nintendo") || text.includes("switch") || text.includes("ds") || text.includes("gamecube")) {
+    return "Nintendo";
+  }
+  return "Retro";
+}
+
+function getSellType(items: PriceToolItem[]): SellType {
+  const allText = normalizeText(items.map((item) => `${item.brand ?? ""} ${item.name ?? ""}`).join(" "));
+  if (allText.includes("pokemon")) return "pokemon";
+  if (allText.includes("zubehor") || allText.includes("controller")) return "zubehoer";
+  if (items.some((item) => normalizeText(item.condition ?? "").includes("defekt"))) return "defekt";
+  if (items.length > 1) return "mehrere";
+  return "einzeln";
+}
+
+function itemLabel(item: PriceToolItem) {
+  const quantity = clampQuantity(item.quantity);
+  const name = item.name ?? "Unbekanntes Produkt";
+  return quantity > 1 ? `${quantity}x ${name}` : name;
+}
+
+function getTotalRange(items: PriceToolItem[]): [number, number] | null {
+  const ranges = items
+    .map((item) => item.range)
+    .filter((range): range is [number, number] => Array.isArray(range) && range.length === 2);
+  if (ranges.length === 0) return null;
+  return ranges.reduce<[number, number]>(
+    (total, range) => [total[0] + Number(range[0] || 0), total[1] + Number(range[1] || 0)],
+    [0, 0],
+  );
+}
+
+function buildProductName(items: PriceToolItem[]) {
+  if (items.length === 1) return itemLabel(items[0]);
+  const preview = items.slice(0, 3).map(itemLabel).join(", ");
+  const rest = items.length > 3 ? ` + ${items.length - 3} weitere` : "";
+  return `Paket: ${preview}${rest}`;
+}
+
+function buildDescription(items: PriceToolItem[], totalRange: [number, number] | null) {
+  const lines = items.map((item) => {
+    const rangeLabel = item.range ? `, Schätzung: ${formatEuro(item.range[0])} - ${formatEuro(item.range[1])}` : "";
+    return `- ${itemLabel(item)} (${[item.brand, item.family].filter(Boolean).join(" / ") || "ohne Kategorie"}), Zustand: ${item.condition ?? "nicht angegeben"}, Vollständigkeit: ${item.completeness ?? "nicht angegeben"}${rangeLabel}`;
+  });
+  const total = totalRange
+    ? `\nGesamtschätzung aus dem Preisschätzer: ${formatEuro(totalRange[0])} - ${formatEuro(totalRange[1])}`
+    : "";
+
+  return `Aus dem RetrOase-Preisschätzer übernommen:\n${lines.join("\n")}${total}\n\nBitte final prüfen und Angebot senden.`;
+}
+
+function buildPrefill(items: PriceToolItem[]) {
+  const first = items[0];
+  const totalRange = getTotalRange(items);
+  const distinctFamilies = Array.from(new Set(items.map((item) => item.family).filter(Boolean) as string[]));
+  const totalQuantity = items.reduce((sum, item) => sum + clampQuantity(item.quantity), 0);
+  const categories = Array.from(new Set(items.map(mapCategory)));
+  const category = categories.length === 1 ? categories[0] : mapCategory(first);
+
+  return {
+    data: {
+      sellType: getSellType(items),
+      productName: buildProductName(items),
+      category,
+      platform: distinctFamilies.slice(0, 3).join(", "),
+      condition: mapCondition(first.condition),
+      completeness: mapCompleteness(first.completeness),
+      description: buildDescription(items, totalRange),
+      quantity: String(totalQuantity),
+    } satisfies Partial<WizardData>,
+    summary: {
+      count: items.length,
+      label: buildProductName(items),
+      rangeLabel: totalRange ? `${formatEuro(totalRange[0])} - ${formatEuro(totalRange[1])}` : null,
+    } satisfies PrefillSummary,
+  };
+}
 
 function validate(step: number, data: WizardData): WizardErrors {
   const e: WizardErrors = {};
@@ -208,6 +407,7 @@ export function AnkaufWizard() {
   const [step, setStep] = useState(0);
   const [data, setData] = useState<WizardData>(INITIAL);
   const [errors, setErrors] = useState<WizardErrors>({});
+  const [prefillSummary, setPrefillSummary] = useState<PrefillSummary | null>(null);
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -215,6 +415,20 @@ export function AnkaufWizard() {
   const [emailWarning, setEmailWarning] = useState<string | null>(null);
   const [requestId, setRequestId] = useState<string | null>(null);
   const topRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const items = readPriceToolImport();
+      if (items.length === 0) return;
+
+      const prefill = buildPrefill(items);
+      setData((prev) => ({ ...prev, ...prefill.data }));
+      setPrefillSummary(prefill.summary);
+      setStep(1);
+    } catch {
+      // Die Vorbefuellung ist Komfort. Bei kaputten lokalen Daten bleibt der Wizard normal nutzbar.
+    }
+  }, []);
 
   function scrollTop() {
     topRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -225,6 +439,31 @@ export function AnkaufWizard() {
     const next = { ...errors };
     Object.keys(patch).forEach((k) => delete next[k]);
     setErrors(next);
+  }
+
+  function clearPriceToolImport() {
+    try {
+      localStorage.removeItem(PRICE_TOOL_STORAGE_KEY);
+    } catch {
+      // Lokaler Speicher kann im Privatmodus blockiert sein.
+    }
+
+    setPrefillSummary(null);
+    setData((prev) => ({
+      ...prev,
+      sellType: null,
+      productName: "",
+      category: "",
+      platform: "",
+      condition: "",
+      completeness: "",
+      description: "",
+      desiredPrice: "",
+      quantity: "1",
+    }));
+    setErrors({});
+    setStep(0);
+    scrollTop();
   }
 
   function handleNext() {
@@ -291,6 +530,12 @@ export function AnkaufWizard() {
       if (json.photoWarning) setPhotoWarning(json.photoWarning);
       if (json.emailWarning) setEmailWarning(json.emailWarning);
       if (json.id) setRequestId(json.id);
+      try {
+        localStorage.removeItem(PRICE_TOOL_STORAGE_KEY);
+      } catch {
+        // Die Anfrage wurde gespeichert; ein fehlgeschlagener Cleanup darf nicht stoeren.
+      }
+      setPrefillSummary(null);
       setSubmitted(true);
       scrollTop();
     } catch {
@@ -310,6 +555,7 @@ export function AnkaufWizard() {
           onReset={() => {
             setData(INITIAL);
             setStep(0);
+            setPrefillSummary(null);
             setSubmitted(false);
             setPhotoWarning(null);
             setEmailWarning(null);
@@ -330,6 +576,37 @@ export function AnkaufWizard() {
     >
       <div className="p-6 lg:p-8">
         <WizardProgress current={step} />
+
+        {prefillSummary && (
+          <div className="mb-6 border border-accent-orange/40 bg-[rgba(255,107,53,0.06)] p-4">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center border border-accent-orange/50 bg-background text-accent-orange">
+                <PackageCheck size={16} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="font-sans text-xs font-semibold uppercase tracking-widest text-accent-orange">
+                  Aus dem Preisschätzer übernommen
+                </p>
+                <p className="mt-1 font-sans text-sm font-semibold text-text-primary">
+                  {prefillSummary.label}
+                </p>
+                <p className="mt-1 font-sans text-xs text-text-secondary">
+                  {prefillSummary.count} Produkt{prefillSummary.count === 1 ? "" : "e"}
+                  {prefillSummary.rangeLabel ? ` · Schätzung: ${prefillSummary.rangeLabel}` : ""}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={clearPriceToolImport}
+                className="flex h-8 w-8 flex-shrink-0 items-center justify-center border border-border text-text-secondary transition-colors hover:border-accent-orange hover:text-accent-orange"
+                aria-label="Import aus dem Preisschätzer entfernen"
+                title="Import entfernen"
+              >
+                <X size={14} />
+              </button>
+            </div>
+          </div>
+        )}
 
         <div className="min-h-[340px]">
           {step === 0 && (

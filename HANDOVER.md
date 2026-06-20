@@ -3,7 +3,7 @@
 > Lebender Übergabe-Stand für die Ankauf-Seite. **Nach jedem größeren Schritt aktualisieren**,
 > damit ein anderer Agent (z. B. Codex) nahtlos mit dem aktuellen Stand weiterarbeiten kann.
 
-**Letztes Update:** 2026-06-18 — Phase 2 komplett (S1–S6); Phase 3 läuft: Preis-Tool V2 + P9/P10 „Wert enthüllen"-Reveal & Trade-In-Bonus fertig.
+**Letztes Update:** 2026-06-18 — Phase 4: AnkaufWizardV2 mit produktabhaengigen Zubehoer-Checklisten aus Preis-Katalog/Fallback.
 
 ---
 
@@ -301,3 +301,342 @@ Reihenfolge in `page.tsx` pflegen, HANDOVER.md aktualisieren.
 **Update v4 (Codex nach User-Feedback):**
 - RetrOase-Guthaben-Bonus von **20% auf 10%** reduziert.
 - `STORE_CREDIT_BONUS` in `AnkaufPriceToolV2.tsx` ist jetzt `0.1`; Badge und Guthaben-Range werden dadurch automatisch als `+10% Power-Up` berechnet.
+
+## 18. Codex-Handover Preis-Admin Fundament 2026-06-18
+**User-Auftrag:** Mit dem Preis-Admin anfangen, damit der Betreiber langfristig volle Kontrolle ueber Marken, Reihen, Varianten, Preise, EANs und Guthaben-Bonus bekommt.
+
+**Neu angelegte Dateien:**
+- `supabase/migrations/20260618_ankauf_price_admin.sql`
+- `app/(admin)/admin/ankauf-preise/page.tsx`
+- `app/(admin)/admin/ankauf-preise/actions.ts`
+
+**Geaenderte Dateien:**
+- `components/admin/AdminSidebar.tsx`: neuer Menuepunkt `Preis-Katalog`.
+- `HANDOVER.md`
+
+**Datenmodell/Migration:**
+- Neue Tabellen:
+  - `ankauf_price_settings`
+  - `ankauf_price_brands`
+  - `ankauf_price_devices`
+  - `ankauf_price_variants`
+  - `ankauf_price_conditions`
+  - `ankauf_price_completeness`
+  - `ankauf_price_games`
+  - `ankauf_price_accessories`
+  - `ankauf_price_adjustments`
+- RLS aktiviert: oeffentlich lesbar fuer aktive Preis-Katalog-Daten, Schreiben nur via `service_role`.
+- Seed aus dem aktuellen lokalen `priceCatalog.ts` migriert: Marken, Reihen/Geraete, Varianten, Zustand-Faktoren, Vollstaendigkeits-Faktoren.
+- `store_credit_bonus` als Einstellung mit `0.1000` (= 10%) angelegt.
+
+**Admin-UI:**
+- Neue Route `/admin/ankauf-preise`.
+- Ohne Login greift der bestehende Adminschutz und leitet zu `/login`.
+- Wenn die Migration noch nicht in Supabase ausgefuehrt wurde, zeigt die Seite einen klaren Hinweis auf:
+  `supabase/migrations/20260618_ankauf_price_admin.sql`.
+- Funktionen:
+  - Trade-In-Bonus in Prozent aendern.
+  - neue Marke anlegen.
+  - neue Reihe / neues Geraet anlegen.
+  - neue Variante anlegen.
+  - Varianten filtern nach Marke, Typ, Status und Suche.
+  - Variante bearbeiten: Name, Typ, Nachfrage, Basispreis von/bis, Aliase, EANs, Bild-URL, Zubehoer-Checklisten, Notizen, aktiv/inaktiv.
+
+**Wichtige Grenze:**
+- Das Frontend-Preis-Tool ist noch NICHT an Supabase angebunden. Es nutzt weiterhin `priceCatalog.ts` als Seed/Fallback.
+- Naechster Schritt ist die Anbindung: Supabase-Katalog laden, `priceCatalog.ts` als Fallback behalten, `store_credit_bonus` aus `ankauf_price_settings` lesen.
+
+**Verifikation durch Codex:**
+- `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+- Dev-Server laeuft auf Port 3000.
+- `http://127.0.0.1:3000/ankauf#preisschaetzer` antwortet mit HTTP 200.
+- `http://127.0.0.1:3000/admin/ankauf-preise` antwortet ohne Login mit HTTP 307 zu `/login`.
+- `npm run build` kompiliert und typecheckt, bricht aber beim Page-Data-Sammeln auf der bestehenden Route `/admin/blog/[id]` mit `PageNotFoundError` ab. Das liegt nicht an den neuen Preis-Admin-Dateien; TypeScript ist sauber. Nach dem fehlgeschlagenen Build wurde `.next` geloescht und der Dev-Server neu gestartet.
+
+## 19. Codex-Handover Supabase-Anbindung Preis-Tool 2026-06-18
+**User-Auftrag:** Nach erfolgreichem Seed im Admin mit der echten Anbindung starten: Der oeffentliche Preisschaetzer soll seine Preiswahrheit aus Supabase/Admin bekommen, nicht mehr nur aus `priceCatalog.ts`.
+
+**Neu angelegte Datei:**
+- `components/ankauf/v2/price/loadPriceCatalog.ts`
+
+**Geaenderte Dateien:**
+- `app/ankauf/page.tsx`
+- `components/ankauf/v2/price/AnkaufPriceToolV2.tsx`
+- `components/ankauf/v2/price/priceCatalog.ts`
+- `app/(admin)/admin/ankauf-preise/actions.ts`
+- `HANDOVER.md`
+
+**Umsetzung:**
+- `/ankauf` laedt serverseitig den aktiven Katalog aus Supabase:
+  - `ankauf_price_settings` fuer `store_credit_bonus`
+  - `ankauf_price_brands`
+  - `ankauf_price_devices`
+  - `ankauf_price_variants`
+  - `ankauf_price_conditions`
+  - `ankauf_price_completeness`
+- Das Preis-Tool bekommt den geladenen Katalog als Prop und nutzt daraus Marken/Reihen/Varianten, Suche, Basispreise, Zustandsfaktoren, OVP/Vollstaendigkeitsfaktoren und den RetrOase-Guthaben-Bonus.
+- Der lokale `priceCatalog.ts` bleibt als Fallback erhalten, falls Supabase leer ist, Tabellen fehlen oder eine Abfrage fehlschlaegt.
+- Der Guthaben-Bonus bleibt bei **10%**, kommt jetzt aber aus `ankauf_price_settings.store_credit_bonus`.
+- Admin-Aenderungen revalidieren jetzt auch `/ankauf`, damit Preis- und Bonus-Aenderungen im Frontend sauber ankommen.
+- `/ankauf` ist `force-dynamic`; in Dev/Preview werden Admin-Aenderungen nach Reload nicht durch statisches Caching verdeckt.
+- Backend/Wizard-Pipeline, `#preisschaetzer`, `#angebot`, localStorage-Key `retroase_price_tool_items` und das Reveal-UI wurden nicht gebrochen.
+
+**Verifikation:**
+- `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+- `GET http://127.0.0.1:3000/ankauf#preisschaetzer` -> 200.
+- `GET http://127.0.0.1:3000/admin/ankauf-preise` -> 200.
+- Lokaler Playwright-Klicktest konnte nicht laufen, weil das Projekt kein `playwright`-Paket installiert hat. Kein Paket wurde nachinstalliert.
+
+**Naechster sinnvoller Schritt:**
+- Kleiner Live-Test durch den User: Im Admin eine Test-Variante oder einen Preis leicht aendern, speichern, `/ankauf#preisschaetzer` hart neu laden und pruefen, ob der neue Wert im Reveal ankommt. Danach kann Phase 3.2 folgen: Paketliste aus `retroase_price_tool_items` im Ankauf-Wizard vorbefuellen.
+
+**Nachfix 2026-06-18:**
+- Problem: Der Admin zeigte 26 Varianten und `store_credit_bonus = 0.11`, aber der oeffentliche Supabase-Client sah wegen unvollstaendiger Public-RLS-Policies 0 Varianten und keinen Bonus. Dadurch fiel `/ankauf` auf den lokalen Fallback mit 10% zurueck.
+- Fix: `loadPriceCatalog.ts` nutzt jetzt server-only den Service-Key/Admin-Client, falls `SUPABASE_SERVICE_KEY` vorhanden ist. Secrets werden nicht an den Browser gegeben; der Client bekommt nur die gemappten Katalogdaten.
+- Verifikation: `GET /ankauf#preisschaetzer` enthaelt im RSC-Payload `storeCreditBonus: 0.11` und `source: "supabase"`. TypeScript erfolgreich.
+
+## 20. Codex-Handover Preis-Tool -> Wizard-Vorbefuellung 2026-06-18
+**User-Auftrag:** Auswahl aus dem Preisschaetzer in den Ankauf-Wizard uebernehmen, damit Kunden nicht alles doppelt eingeben muessen. Gleichzeitig klaeren, wann der Wizard komplett neu als V2 gebaut werden soll.
+
+**Geaenderte Datei:**
+- `components/ankauf/wizard/AnkaufWizard.tsx`
+- `HANDOVER.md`
+
+**Umsetzung:**
+- Der bestehende Wizard liest beim Laden `localStorage.retroase_price_tool_items`.
+- Wenn Daten vorhanden sind, werden automatisch befuellt:
+  - Verkaufstyp (`einzeln`, `mehrere`, `pokemon`, `zubehoer`, `defekt`)
+  - Produktname/Paketname
+  - Kategorie
+  - Plattform/Reihe
+  - Zustand
+  - Vollstaendigkeit
+  - Gesamtmenge
+  - Beschreibung inklusive einzelner Positionen und Preisrange aus dem Preisschaetzer
+- Nach Import springt der Wizard direkt auf Schritt 2 Kontakt. Schritt 1 und Details bleiben ueber Zurueck/Weiter editierbar.
+- Sichtbarer Hinweisblock: "Aus dem Preisschaetzer uebernommen" mit Produkt-/Paketname, Anzahl und Schaetzung.
+- Import kann ueber X entfernt werden; dabei werden nur Ankauf-/Produktfelder zurueckgesetzt.
+- Nach erfolgreichem Absenden wird `retroase_price_tool_items` geloescht, damit keine alte Anfrage erneut importiert wird.
+
+**Wichtige Grenze:**
+- Der bestehende Wizard wurde bewusst nicht spektakulaer umgebaut. Das ist nur die Bridge, damit der aktuelle Flow sofort besser funktioniert.
+- Empfehlung fuer naechste grosse Phase: **AnkaufWizardV2** komplett neu bauen, statt den alten 5-Step-Wizard weiter aufzubohren.
+
+**Wizard-V2 Empfehlung:**
+- Neuer Guided Flow nach Preis-Tool-Logik:
+  1. Dein Paket bestaetigen
+  2. Zustand/Zubehoer/Fotos je Position
+  3. Auszahlung vs. RetrOase-Guthaben waehlen
+  4. Kontaktdaten
+  5. Review + Absenden
+- Visuell: VAULT/Casino-Flow, ein Fokus pro Screen, klare Next-Richtung, mobile-first, spaeter Barcode/Fotos als eigene Momente.
+- Technisch: erst als neue Komponente parallel bauen (`components/ankauf/v2/wizard/AnkaufWizardV2.tsx`), Backend-Vertrag unveraendert lassen, danach alten Wizard ersetzen.
+
+**Verifikation:**
+- `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+- `GET http://127.0.0.1:3000/ankauf#angebot` -> 200.
+
+**Nachfix 2026-06-18:**
+- Problem: Alte `retroase_price_tool_items` lagen als nacktes Array im Browser-LocalStorage. Dadurch konnte der Wizard ein altes Paket importieren, obwohl der User gerade nur ein einzelnes Produkt gewaehlt hatte.
+- Fix:
+  - `AnkaufPriceToolV2.tsx` speichert den Import jetzt als versioniertes Payload-Objekt mit `version: 2`, `source: "ankauf-price-tool-v2"` und `savedAt`.
+  - `AnkaufWizard.tsx` akzeptiert nur noch dieses neue Format und nur, wenn es maximal 20 Minuten alt ist.
+  - Legacy-Array-Daten werden automatisch aus dem LocalStorage geloescht und nicht importiert.
+- Verifikation: TypeScript erfolgreich.
+
+## 21. Codex-Handover AnkaufWizardV2 2026-06-18
+**User-Auftrag:** Den geplanten komplett neuen Ankauf-Wizard V2 als Premium-Arcade-Flow umsetzen. Der alte Wizard bleibt als Rueckfall im Repo, wird auf `/ankauf` aber nicht mehr gerendert.
+
+**Neu angelegte Datei:**
+- `components/ankauf/v2/wizard/AnkaufWizardV2.tsx`
+
+**Geaenderte Dateien:**
+- `app/ankauf/page.tsx`
+- `app/ankauf/ankauf.css`
+- `HANDOVER.md`
+
+**Umsetzung:**
+- Neuer gefuehrter 5-Step-Flow unter `#angebot`:
+  1. Paket bestaetigen
+  2. Zustand & Zubehoer
+  3. Fotos
+  4. Kontakt
+  5. Review & Absenden
+- V2 hat eigenen detaillierten State mit `items[]`, `contact`, `photos`, `consents`.
+- Preisschaetzer-Import:
+  - liest nur das versionierte `retroase_price_tool_items` Format mit `version: 2` und `source: "ankauf-price-tool-v2"`.
+  - akzeptiert nur frische Daten bis 20 Minuten.
+  - Legacy-Arrays werden geloescht/ignoriert.
+- Standalone-Start:
+  - Wenn kein Import vorhanden ist, startet der Wizard mit einem leeren Produkt-Slot.
+  - Produkte koennen hinzugefuegt, entfernt und mengenmaessig angepasst werden.
+- Auszahlung:
+  - Kein eigener Auswahl-Step mehr im Wizard.
+  - Kunde entscheidet erst nach dem finalen Angebot zwischen Sofort-Auszahlung und RetrOase-Guthaben.
+  - `storeCreditBonus` kommt weiter aus `priceCatalog.storeCreditBonus` und wird nur in der Anfrage/Review als Hinweis dokumentiert.
+- Submit:
+  - V2 mappt seinen detaillierten State zurueck in den bestehenden `/api/ankauf` FormData-Vertrag.
+  - Keine DB-Migration und kein API-Vertragsbruch.
+  - Nach erfolgreichem Submit wird der Preisschaetzer-Import aus localStorage geloescht.
+- Design:
+  - Neue Styles sind unter `.ak-stage` / `.ak-wizard-v2-*` in `app/ankauf/ankauf.css` gescoped.
+  - Premium-Arcade/Mission-Map statt altem Formular-Look.
+  - Mobile-first Layout, grosse Touch-Flaechen, responsive einspaltig auf kleinen Screens.
+
+**Verifikation:**
+- `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+- `GET http://127.0.0.1:3000/ankauf#angebot` -> 200.
+
+**Naechste Ausbaustufe:**
+- Admin-Zubehoer-Checklisten fuer die wichtigsten Varianten einpflegen, danach EAN/Barcode-Scanner und Foto-Anforderungen pro Produkt.
+
+## 22. Claude-Handover Light Mode + offene Aufgaben 2026-06-18
+**User-Auftrag:** "Ich will alles einmal in dem Neuen Look ueberarbeitet haben! Vorallem soll es fuer alles auch einmal ein Light mode geben nicht nur Dark!" — zuerst die Ankauf-Tools, dann die ganze /ankauf-Seite; anschliessend mehrere Kontrast-Nachbesserungen ("manche sachen sieht man immernoch nicht").
+
+**Geaenderte Dateien:**
+- `app/ankauf/ankauf.css` (grosser additiver Light-Block am Ende)
+- `components/ankauf/v2/hero/HeroHeadline.tsx` (`text-white` -> `color: var(--ak-text)`)
+- `components/ankauf/v2/wizard/AnkaufWizardV2.tsx` (Foto-Typ-Filter + `accept`)
+
+**Umsetzung Light Mode:**
+- Aktiv wenn KEINE `.dark`-Klasse am `<html>` (ThemeProvider-Toggle). Default bleibt Dark.
+- Umgesetzt als `:root:not(.dark) .ak-stage { … }` Token-Remap (warmes Elfenbein + tiefes Gold) + komponentenweise Overrides. Dark Mode komplett unberuehrt.
+- Token-Remap (Auszug): `--ak-bg:#faf6ec`, `--ak-surface:#fffdf8`, `--ak-text:#221a10`, `--ak-gold:#b26a00`, `--ak-green:#0b8f50`, Glows auf `0 0 0 rgba(0,0,0,0)` (nicht `none`, wegen box-shadow-Listen).
+- Abgedeckt: Hero, S1 Value, S2, S3 Ticker, S4 Steps, S5 Reviews/Stats, S6 FOMO + Preis-Tool V2 + AnkaufWizardV2.
+- Kontrast-Fixes: `.ak-review-card` (war dunkel), `.ak-item-row`/`.ak-item-actions input` (unsichtbar/dunkel), `.ak-ticker-price` (Neon-Flash aus), `--ak-text-mute` von 0.46 -> 0.56, `.ak-fomo-*`, `.ak-s2-dim`, Proof/FOMO-Sektions-Verlaeufe.
+
+**⚠️ Light-Mode-Falle (NICHT erneut reinlaufen):**
+- Bei `.ak-gold-text` (gold-gradient Clip-Schrift) im Light-Override NUR `background-image` ueberschreiben, NIEMALS die `background`-Shorthand — die resettet `background-clip: text`, der Verlauf fuellt dann den ganzen Kasten statt der Buchstaben (massiver Gold-Balken). Clip-Properties im Override mit-deklarieren.
+
+**Foto-Bug-Fix:** Wizard `addPhotos` nahm vorher jedes `image/*` an, Server `/api/ankauf` akzeptiert aber nur jpeg/png/webp -> HEIC/GIF lies den GANZEN Submit mit 400 scheitern. Jetzt client-seitig auf jpeg/png/webp gefiltert (+ klarer Hinweis) und `accept`-Attribut angepasst.
+
+**NOCH ZU TUN — /ankauf:**
+1. Hero-3D-Szene (`components/ankauf/v2/hero/HeroScene3D.tsx`) im Light Mode pruefen — Three.js fuer dunklen Grund gebaut; Licht/Material evtl. anpassen (nicht per CSS loesbar).
+2. Light Mode responsive pruefen (320/375/768/1024/1440) — keine dunklen/blassen Reste, Tools mobil bedienbar.
+3. Live-Submit-Test AnkaufWizardV2 (echter POST -> Insert `ankauf_requests`, Upload Bucket `ankauf-items`, 2 Resend-Mails, Erfolgsscreen + `/ankauf/status/{id}`).
+4. Admin-Zubehoer-Checklisten fuer die wichtigsten Varianten pflegen und im Wizard gegenpruefen.
+5. Accessibility: WCAG-Kontrast fuer Gold/Gruen auf Elfenbein nachmessen, Tastatur-Nav, reduced-motion.
+
+**NOCH ZU TUN — Launch:**
+- Supabase PROD: Migration `supabase/migrations/20260618_ankauf_price_admin.sql` ausfuehren + Storage-Bucket `ankauf-items` anlegen.
+- Resend: Domain @retroase.de verifizieren, DANN `RESEND_FROM_EMAIL` setzen (aktuell `onboarding@resend.dev`).
+- Vercel: ENV (Supabase service key, RESEND_*, ADMIN_EMAIL …) eintragen.
+- eBay: Webhook + Token erst beim Launch aktivieren.
+- Post-Launch: Barcode/EAN-Scanner + grosse Spiele-Datenbank.
+
+**Verifikation:** `GET http://127.0.0.1:3001/ankauf` -> 200 (Port 3000 war belegt). Light Mode visuell vom User bestaetigt (Hero, Reviews, Ticker) nach mehreren Kontrast-Iterationen.
+
+**Codex QA-Nachfix 2026-06-18:**
+- Read-only Browser-QA per Headless Chrome fuer Light Mode auf `http://127.0.0.1:3000/ankauf` durchgefuehrt.
+- Gepruefte Viewports: 320, 375, 768, 1024, 1440.
+- Hero-3D-Szene im Light Mode geprueft: Canvas rendert, TV/Coins sind auf hellem Grund gut sichtbar; keine Material-/Licht-Aenderung noetig.
+- Gefunden und gefixt:
+  - Horizontaler Overflow durch breite Marquee-/Reveal-Elemente -> `.ak-stage` bekommt `overflow-x: hidden; overflow-x: clip;`.
+  - `ak-wizard-v2-section` hatte im Light Mode noch hardcoded dunklen Hintergrund, waehrend Text schon dunkel war -> Light-Override fuer die Wizard-Section ergaenzt.
+- Nachfix verifiziert:
+  - Kein horizontales Overflow auf 320/375/768/1024/1440.
+  - Keine Console-/Network-Fehler im Headless-Check.
+  - Wizard-Heading im Light Mode wieder lesbar.
+  - `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erneut erfolgreich.
+
+**Codex Live-Submit-Test 2026-06-18:**
+- Echter AnkaufWizardV2-Submit ueber Browser-Automation ausgefuehrt.
+- Testdaten:
+  - Produkt: `TEST Nintendo DS Lite Codex ...`
+  - Hinweis: `TESTANFRAGE BITTE IGNORIEREN - automatischer Live-Test Codex.`
+  - Foto: kleines Test-PNG.
+- Ergebnis:
+  - Erfolgsscreen wurde angezeigt.
+  - Anfrage-ID: `7359eea0-0ccc-423b-9e06-c6ba1feaa206`.
+  - `GET /ankauf/status/7359eea0-0ccc-423b-9e06-c6ba1feaa206` -> 200.
+  - Supabase `ankauf_requests`: Eintrag vorhanden, Status `Eingegangen`, Kategorie `Nintendo`, Plattform `Nintendo DS`, Zustand `Gut`, Menge `1`, Testmarker in Beschreibung vorhanden.
+  - Storage Bucket `ankauf-items`: Upload vorhanden unter `7359eea0-0ccc-423b-9e06-c6ba1feaa206/00.png`.
+- Mail-Fund:
+  - Resend-Logs zeigten beim Test zwei fehlgeschlagene POSTs:
+    - Kundenmail: 403, weil ohne verifizierte Domain nur an die Resend-eigene Testadresse gesendet werden darf.
+    - Adminmail: 422, weil `ADMIN_EMAIL` kommasepariert war und vorher als ein String an Resend ging.
+  - API gab trotzdem keine `emailWarning` zurueck, weil Resend-Fehler als `{ error }` aufloesen und nicht zwingend als Promise-Rejection.
+- Fix in `app/api/ankauf/route.ts`:
+  - `ADMIN_EMAIL` wird jetzt per Komma in eine saubere Empfaengerliste geparst.
+  - Resend-Ergebnisse mit `value.error` werden jetzt als Mail-Fehler erkannt.
+  - Bei teilweisem Fehler kommt `emailWarning: "Eine E-Mail-Benachrichtigung konnte nicht gesendet werden."`, bei komplettem Fehler bleibt die bestehende Warnung.
+- Nachfix-Verifikation:
+  - `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+  - Status-Link der Test-Anfrage weiterhin 200.
+
+**Codex Wizard-Zubehoer-Checklisten 2026-06-18:**
+- User-Auftrag: Als naechsten Schritt die produktabhaengigen Zubehoer-Checklisten im AnkaufWizardV2 bauen.
+- Geaenderte Dateien:
+  - `components/ankauf/v2/price/priceCatalog.ts`
+  - `components/ankauf/v2/price/loadPriceCatalog.ts`
+  - `components/ankauf/v2/price/AnkaufPriceToolV2.tsx`
+  - `components/ankauf/v2/wizard/AnkaufWizardV2.tsx`
+  - `app/ankauf/page.tsx`
+  - `app/ankauf/ankauf.css`
+  - `HANDOVER.md`
+- Umsetzung:
+  - `PriceVariant` kennt jetzt optional `requiredAccessories` und `optionalAccessories`.
+  - `loadPriceCatalog()` laedt `required_accessories` und `optional_accessories` aus `ankauf_price_variants`.
+  - Preis-Tool schreibt beim Uebergang zum Wizard jetzt `variantId` in `retroase_price_tool_items`.
+  - `AnkaufWizardV2` bekommt `priceCatalog.variants` als Prop, liest die `variantId` beim Import und zeigt in Schritt 2 eine Checkliste je Produkt.
+  - Wenn im Admin noch keine Zubehoerlisten gepflegt sind, nutzt der Wizard sinnvolle Fallbacks nach Produktfamilie/Typ: z. B. Switch, DS/3DS, Game Boy, PlayStation/Xbox, Spiele, Karten.
+  - UI trennt "Wichtig fuer den Preis" und "Bonus-Zubehoer"; Auswahl bleibt weiter als Textliste im bestehenden API-Description-Vertrag. Keine API-/DB-Vertragsaenderung.
+  - Light Mode und Mobile-Stacking fuer die neuen Kit-Flaechen ergaenzt.
+- Verifikation:
+  - `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+  - `GET http://127.0.0.1:3000/ankauf` -> 200.
+  - Headless-Chrome-Smoke auf 390px mit DS-Lite-Import: Checkliste zeigt `Ladegerat / Netzteil`, `Stift / Stylus`, `Originalverpackung`, `Anleitung`, `Tasche`; horizontaler Overflow `0`.
+- Naechster sinnvoller Schritt:
+  - Im Admin bei wichtigen Varianten echte Pflicht-/Optional-Listen einpflegen und pruefen, ob der Wizard danach "Checkliste aus deinem Preis-Katalog" statt Fallback anzeigt.
+  - Danach: Barcode/EAN-Scanner oder per-Produkt-Fotoanforderungen.
+
+**Codex Visual Product Picker 2026-06-18:**
+- User-Auftrag: Preis-Tool spielerischer wie einen Auto-Konfigurator gestalten: Logos/Bilder, Modellkarten und Ausstattungsliste.
+- Geaenderte Dateien:
+  - `components/ankauf/v2/price/priceCatalog.ts`
+  - `components/ankauf/v2/price/loadPriceCatalog.ts`
+  - `components/ankauf/v2/price/AnkaufPriceToolV2.tsx`
+  - `app/ankauf/ankauf.css`
+  - `HANDOVER.md`
+- Umsetzung:
+  - `PriceVariant` kennt jetzt `brandLogoUrl`, `familyImageUrl` und `imageUrl`.
+  - `loadPriceCatalog()` laedt `logo_url` aus `ankauf_price_brands`, `image_url` aus `ankauf_price_devices` und `image_url` aus `ankauf_price_variants`.
+  - Preis-Tool zeigt jetzt einen visuellen Setup-Builder:
+    1. Marke als Logo-Karte
+    2. Reihe als horizontale Bild-/Badge-Auswahl
+    3. Modell als Produktkarte mit Bildflaeche, Typ/Nachfrage-Badge, Basisrange und Mini-Ausstattung
+  - Wenn noch keine echten Bilder im Admin gepflegt sind, erscheinen bewusst gestaltete Retro-Fallback-Karten statt kaputter Images.
+  - Ausstattungspanel zeigt Pflicht-/Optionalteile aus Admin-Daten oder sinnvolle Fallbacks.
+  - Alte Select-Struktur bleibt versteckt als defensiver Fallback im Code, sichtbar ist der neue Konfigurator.
+- Verifikation:
+  - `npx tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+  - Headless-Chrome-Smoke auf 390px: 6 Marken-Karten, Reihen-/Modellkarten, Ausstattungsliste sichtbar, Console-Errors `0`, horizontaler Overflow `0`.
+- Wichtiger Hinweis:
+  - Aktuell sind im `public`-Ordner keine echten Konsolen-/Logo-Bilddateien gefunden worden. Sobald im Admin `logo_url`/`image_url` auf erlaubte Quellen zeigen (`/images/...`, Supabase Storage, eBay image host, placehold.co), werden echte Bilder automatisch gerendert.
+
+**Codex AnkaufFunnelV3 2026-06-18:**
+- User-Entscheidung: `/ankauf` war zu ueberladen. Schätzer und direkter Ankauf sollen zu einem fokussierten Erlebnis verschmelzen: erst immer Wert schätzen, bei Einverstaendnis dann in eine geschlossene Formular-/Checkout-Umgebung.
+- Neu:
+  - `components/ankauf/v3/AnkaufFunnelV3.tsx`
+- Geaenderte Dateien:
+  - `app/ankauf/page.tsx`
+  - `components/ankauf/v2/price/AnkaufPriceToolV2.tsx`
+  - `app/ankauf/ankauf.css`
+  - `HANDOVER.md`
+- Umsetzung:
+  - `/ankauf` rendert jetzt nur noch den V3-Funnel, nicht mehr die lange Hero/S1-S6/FOMO/FAQ/Wizard-Scrollseite.
+  - Der erste Screen ist der Ankauf-Automat mit Preis-Tool, Mini-Trust-Bar und kompakten Proof-Hinweisen.
+  - `AnkaufPriceToolV2` kann jetzt optional im Funnel-Modus laufen:
+    - `offerCtaLabel`
+    - `onOfferStart`
+    - `requireRevealBeforeOffer`
+  - Im Funnel ist der CTA erst nach dem Wert-Reveal aktiv und lautet sinngemaess "Schatzung passt - Ankauf starten".
+  - Beim Start wird die Paketliste weiter ins bestehende `retroase_price_tool_items` geschrieben; danach mountet `AnkaufWizardV2` im Fokus-Modus und liest den Import wie bisher.
+  - `#preisschaetzer` bleibt der erste Screen, `#angebot` bleibt der Fokus-/Wizard-Screen. Direktaufruf von `#angebot` schaltet den Fokusmodus ein.
+  - Lange Trust-/FOMO-/Story-Sektionen bleiben im Code, werden auf `/ankauf` aber nicht mehr gerendert.
+- Verifikation:
+  - `npx.cmd tsc --noEmit --incremental --tsBuildInfoFile node_modules\.cache\tsc-perf.tsbuildinfo` erfolgreich.
+  - `GET http://127.0.0.1:3000/ankauf` -> 200.
+  - HTML-Smoke: `ak-funnel-v3` und `ak-price-tool` vorhanden, alte Hero-Klasse nicht mehr im ausgelieferten HTML.
+- Hinweis:
+  - Headless-Chrome-Smoke konnte in dieser Umgebung nicht voll ausgefuehrt werden: Node-REPL wurde durch Windows-Sandbox blockiert, Projekt hat kein lokales `playwright` Package. Manuell im Browser/Handy testen.

@@ -5,6 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   PackageSearch,
+  Coins,
   Package,
   FileText,
   Bell,
@@ -27,6 +28,7 @@ const NAV_SECTIONS: NavItem[][] = [
   [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
     { href: "/admin/ankauf", label: "Ankauf", icon: PackageSearch, exact: false },
+    { href: "/admin/ankauf-preise", label: "Preis-Katalog", icon: Coins, exact: false },
     { href: "/admin/products", label: "Produkte", icon: Package, exact: false },
     { href: "/admin/blog", label: "Blog", icon: FileText, exact: false },
     { href: "/admin/alerts", label: "Such-Alerts", icon: Bell, exact: false },

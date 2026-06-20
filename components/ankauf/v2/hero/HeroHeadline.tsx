@@ -45,7 +45,7 @@ export function HeroHeadline({ reduced }: { reduced: boolean }) {
   if (reduced) {
     return (
       <h1 className="ak-display text-[clamp(2.8rem,8vw,7rem)]">
-        <span className="block text-white">{LINE_1}</span>
+        <span className="block" style={{ color: "var(--ak-text)" }}>{LINE_1}</span>
         <span className="ak-gold-text ak-neon-gold block">{LINE_2}</span>
       </h1>
     );
@@ -53,7 +53,7 @@ export function HeroHeadline({ reduced }: { reduced: boolean }) {
 
   return (
     <h1 className="ak-display text-[clamp(2.8rem,8vw,7rem)]">
-      <span className="block text-white">
+      <span className="block" style={{ color: "var(--ak-text)" }}>
         <AnimatedLetters text={LINE_1} />
       </span>
       <motion.span

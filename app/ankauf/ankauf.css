@@ -47,6 +47,8 @@
   color: var(--ak-text);
   font-family: var(--font-inter), system-ui, sans-serif;
   isolation: isolate;
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ── Typo-Helfer ─────────────────────────────────────────── */
@@ -1386,6 +1388,330 @@
   margin-top: 1.2rem;
 }
 
+.ak-configurator {
+  display: grid;
+  gap: 1.05rem;
+}
+.ak-config-search {
+  display: grid;
+  gap: 0.55rem;
+}
+.ak-config-step {
+  display: grid;
+  gap: 0.75rem;
+  border: 1px solid rgba(255, 201, 60, 0.10);
+  border-radius: 17px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 201, 60, 0.08), transparent 48%),
+    rgba(255, 255, 255, 0.025);
+  padding: clamp(0.85rem, 2vw, 1rem);
+}
+.ak-config-step-head {
+  display: flex;
+  align-items: center;
+  gap: 0.72rem;
+}
+.ak-config-step-head .ak-price-label {
+  margin: 0;
+}
+.ak-config-step-head strong {
+  display: block;
+  margin-top: 0.12rem;
+  color: var(--ak-text);
+  font-size: 0.98rem;
+}
+.ak-config-step-number {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--ak-line-gold);
+  border-radius: 12px;
+  color: var(--ak-gold);
+  background: rgba(255, 201, 60, 0.08);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.ak-brand-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+.ak-brand-grid button,
+.ak-family-rail button,
+.ak-model-grid button {
+  border: 1px solid var(--ak-line);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--ak-text);
+  text-align: left;
+  transition: transform 0.2s var(--ak-smooth), border-color 0.2s ease, background 0.2s ease,
+    box-shadow 0.2s ease;
+}
+.ak-brand-grid button {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  align-items: center;
+  gap: 0.72rem;
+  min-height: 82px;
+  border-radius: 15px;
+  padding: 0.72rem;
+}
+.ak-brand-grid button:hover,
+.ak-family-rail button:hover,
+.ak-model-grid button:hover {
+  transform: translateY(-2px);
+  border-color: var(--ak-line-gold);
+}
+.ak-brand-grid button.is-active,
+.ak-family-rail button.is-active,
+.ak-model-grid button.is-active {
+  border-color: var(--ak-gold);
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 201, 60, 0.18), transparent 62%),
+    rgba(255, 201, 60, 0.055);
+  box-shadow: inset 0 0 0 1px rgba(255, 201, 60, 0.32);
+}
+.ak-brand-logo,
+.ak-family-mini {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border: 1px solid rgba(255, 201, 60, 0.16);
+  background:
+    linear-gradient(145deg, rgba(255, 201, 60, 0.14), rgba(255, 255, 255, 0.035)),
+    rgba(0, 0, 0, 0.18);
+}
+.ak-brand-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 15px;
+}
+.ak-brand-logo-img,
+.ak-family-mini-img,
+.ak-model-img,
+.ak-search-thumb-img {
+  object-fit: contain;
+}
+.ak-brand-logo strong {
+  color: var(--ak-gold);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 1rem;
+  font-weight: 900;
+}
+.ak-brand-grid button > span:last-child,
+.ak-family-rail button,
+.ak-model-copy {
+  min-width: 0;
+}
+.ak-brand-grid button > span:last-child {
+  display: grid;
+  gap: 0.18rem;
+  font-weight: 900;
+}
+.ak-brand-grid small,
+.ak-family-rail small,
+.ak-model-copy small,
+.ak-model-copy em {
+  color: var(--ak-text-mute);
+  font-size: 0.72rem;
+  font-style: normal;
+}
+.ak-family-rail {
+  display: flex;
+  gap: 0.65rem;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  padding-bottom: 0.1rem;
+}
+.ak-family-rail button {
+  display: grid;
+  grid-template-columns: 44px minmax(110px, 1fr);
+  grid-template-rows: auto auto;
+  align-items: center;
+  column-gap: 0.65rem;
+  min-width: 190px;
+  border-radius: 15px;
+  padding: 0.65rem;
+}
+.ak-family-mini {
+  grid-row: span 2;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+.ak-family-mini span {
+  color: var(--ak-gold);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.ak-family-rail strong {
+  overflow: hidden;
+  color: var(--ak-text);
+  font-size: 0.9rem;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ak-model-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+.ak-model-grid button {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+  border-radius: 16px;
+  padding: 0.72rem;
+}
+.ak-model-visual {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 1.22;
+  border: 1px solid rgba(255, 201, 60, 0.13);
+  border-radius: 13px;
+  background:
+    radial-gradient(circle at 50% 18%, rgba(255, 201, 60, 0.14), transparent 52%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18));
+}
+.ak-product-fallback {
+  display: grid;
+  place-items: center;
+  gap: 0.18rem;
+  color: var(--ak-text-mute);
+  text-align: center;
+}
+.ak-product-fallback svg {
+  color: var(--ak-gold);
+}
+.ak-product-fallback strong {
+  color: var(--ak-text);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: clamp(1.25rem, 4vw, 2rem);
+  line-height: 1;
+}
+.ak-product-fallback span {
+  color: var(--ak-text-mute);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ak-model-check {
+  position: absolute;
+  top: 0.45rem;
+  right: 0.45rem;
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  background: var(--ak-gold-grad);
+  color: #241500;
+  box-shadow: var(--ak-glow-gold);
+}
+.ak-model-copy {
+  display: grid;
+  gap: 0.22rem;
+}
+.ak-model-copy strong {
+  color: var(--ak-text);
+  font-size: 0.95rem;
+  line-height: 1.18;
+}
+.ak-model-copy em {
+  color: var(--ak-gold);
+  font-family: var(--font-jetbrains), monospace;
+  font-weight: 900;
+}
+.ak-model-equipment {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.ak-model-equipment i {
+  max-width: 100%;
+  overflow: hidden;
+  border: 1px solid rgba(0, 255, 136, 0.14);
+  border-radius: 999px;
+  color: var(--ak-text-dim);
+  padding: 0.32rem 0.48rem;
+  font-size: 0.66rem;
+  font-style: normal;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ak-config-details {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 0.82fr);
+  gap: 0.85rem;
+  align-items: start;
+}
+.ak-config-fields {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+}
+.ak-config-fields label {
+  display: grid;
+  gap: 0.45rem;
+}
+.ak-config-fields select {
+  width: 100%;
+}
+.ak-loadout-panel {
+  border: 1px solid rgba(0, 255, 136, 0.16);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(0, 255, 136, 0.08), transparent 48%),
+    rgba(0, 0, 0, 0.18);
+  padding: 0.85rem;
+}
+.ak-loadout-head strong {
+  display: block;
+  overflow: hidden;
+  color: var(--ak-text);
+  font-size: 0.98rem;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.ak-loadout-groups {
+  display: grid;
+  gap: 0.72rem;
+  margin-top: 0.75rem;
+}
+.ak-loadout-groups div {
+  display: grid;
+  gap: 0.38rem;
+}
+.ak-loadout-groups span {
+  color: var(--ak-text-mute);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ak-loadout-groups p {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--ak-text-dim);
+  font-size: 0.8rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+.ak-loadout-groups svg {
+  flex-shrink: 0;
+  color: var(--ak-green);
+}
+
 /* Paket-/Produkt-Zusammenfassung (ohne Einzelpreis) */
 .ak-paket-panel {
   margin-top: 1rem;
@@ -1435,6 +1761,40 @@
 
 @media (max-width: 540px) {
   .ak-mode-toggle {
+    grid-template-columns: 1fr;
+  }
+  .ak-brand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .ak-brand-grid button {
+    grid-template-columns: 46px 1fr;
+    min-height: 72px;
+    padding: 0.62rem;
+  }
+  .ak-brand-logo {
+    width: 46px;
+    height: 46px;
+    border-radius: 13px;
+  }
+  .ak-family-rail {
+    margin-inline: -0.2rem;
+    padding-inline: 0.2rem;
+  }
+  .ak-model-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.62rem;
+  }
+  .ak-model-grid button {
+    padding: 0.58rem;
+  }
+  .ak-model-copy strong {
+    font-size: 0.84rem;
+  }
+  .ak-model-equipment i {
+    display: none;
+  }
+  .ak-config-details,
+  .ak-config-fields {
     grid-template-columns: 1fr;
   }
 }
@@ -1989,4 +2349,1260 @@
   .ak-s6-orbit span {
     animation: none !important;
   }
+}
+
+/* ============================================================
+   PHASE 4 - AnkaufWizardV2 / Premium Arcade Flow
+   ============================================================ */
+.ak-stage.ak-wizard-v2-section {
+  position: relative;
+  overflow: hidden;
+  scroll-margin-top: 82px;
+  padding-block: clamp(4.5rem, 8vw, 7.5rem);
+  background:
+    radial-gradient(ellipse 58% 42% at 50% 0%, rgba(255, 201, 60, 0.11), transparent 70%),
+    radial-gradient(ellipse 42% 44% at 88% 42%, rgba(54, 224, 255, 0.06), transparent 68%),
+    linear-gradient(180deg, #060609 0%, #0a0910 48%, #060609 100%);
+}
+
+.ak-wizard-v2-heading {
+  max-width: 48rem;
+  margin-inline: auto;
+  margin-bottom: clamp(1.8rem, 4vw, 3rem);
+  text-align: center;
+}
+.ak-wizard-v2-heading h2 {
+  margin-top: 0.55rem;
+  color: var(--ak-text);
+}
+.ak-wizard-v2-heading p:last-child {
+  max-width: 38rem;
+  margin: 0.8rem auto 0;
+  color: var(--ak-text-dim);
+  font-size: 0.98rem;
+  line-height: 1.55;
+}
+
+.ak-wizard-v2 {
+  max-width: 72rem;
+  margin-inline: auto;
+}
+
+.ak-wizard-v2-shell {
+  display: grid;
+  grid-template-columns: minmax(240px, 0.72fr) minmax(0, 1.28fr);
+  gap: clamp(1rem, 2vw, 1.4rem);
+  align-items: stretch;
+}
+
+.ak-wizard-v2-side,
+.ak-wizard-v2-main,
+.ak-wizard-v2-success {
+  border: 1px solid var(--ak-line-gold);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 24% 0%, rgba(255, 201, 60, 0.12), transparent 42%),
+    rgba(10, 10, 18, 0.92);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.30),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.ak-wizard-v2-side {
+  position: sticky;
+  top: 92px;
+  min-height: 620px;
+  align-self: start;
+  padding: clamp(1.1rem, 2.4vw, 1.5rem);
+}
+.ak-wizard-v2-side h3 {
+  margin-top: 1.1rem;
+  color: var(--ak-text);
+  font-size: clamp(1.55rem, 3vw, 2.25rem);
+  line-height: 1.05;
+  font-weight: 900;
+}
+.ak-wizard-v2-side p {
+  margin-top: 0.7rem;
+  color: var(--ak-text-dim);
+  font-size: 0.9rem;
+  line-height: 1.55;
+}
+
+.ak-wizard-v2-map {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.65rem;
+}
+.ak-wizard-v2-node {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  align-items: center;
+  gap: 0.7rem;
+  color: var(--ak-text-mute);
+}
+.ak-wizard-v2-node span {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ak-line);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+.ak-wizard-v2-node small {
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.11em;
+}
+.ak-wizard-v2-node[data-state="done"] span {
+  border-color: rgba(0, 255, 136, 0.45);
+  background: rgba(0, 255, 136, 0.12);
+  color: var(--ak-green);
+}
+.ak-wizard-v2-node[data-state="active"] {
+  color: var(--ak-gold-1);
+}
+.ak-wizard-v2-node[data-state="active"] span {
+  border-color: var(--ak-gold);
+  background: rgba(255, 201, 60, 0.13);
+  color: var(--ak-gold);
+  box-shadow: 0 0 24px rgba(255, 201, 60, 0.22);
+}
+
+.ak-wizard-v2-side-total {
+  margin-top: 1.6rem;
+  padding: 1rem;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.18);
+}
+.ak-wizard-v2-side-total span,
+.ak-wizard-v2-summary-line span {
+  display: block;
+  color: var(--ak-text-mute);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-side-total strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: var(--ak-text);
+  font-size: 1.25rem;
+}
+.ak-wizard-v2-side-total small {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--ak-text-dim);
+}
+
+.ak-wizard-v2-main {
+  min-height: 620px;
+  padding: clamp(1rem, 2.5vw, 1.45rem);
+}
+
+.ak-wizard-v2-panel {
+  animation: ak-wizard-v2-enter 0.34s var(--ak-smooth) both;
+}
+@keyframes ak-wizard-v2-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.ak-wizard-v2-panel-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+}
+.ak-wizard-v2-panel-head > svg {
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0.65rem;
+  border: 1px solid var(--ak-line-gold);
+  border-radius: 14px;
+  color: var(--ak-gold);
+  background: rgba(255, 201, 60, 0.08);
+}
+.ak-wizard-v2-panel-head h4 {
+  margin-top: 0.18rem;
+  color: var(--ak-text);
+  font-size: clamp(1.35rem, 2.6vw, 2rem);
+  line-height: 1.08;
+  font-weight: 900;
+}
+
+.ak-wizard-v2-error,
+.ak-wizard-v2-warning {
+  margin-bottom: 1rem;
+  border: 1px solid rgba(255, 59, 92, 0.38);
+  border-radius: 14px;
+  background: rgba(255, 59, 92, 0.08);
+  color: #ffc5d0;
+  padding: 0.9rem 1rem;
+  font-size: 0.85rem;
+  line-height: 1.45;
+}
+
+.ak-wizard-v2-import {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid rgba(0, 255, 136, 0.24);
+  border-radius: 14px;
+  background: rgba(0, 255, 136, 0.06);
+  color: var(--ak-text-dim);
+  font-size: 0.86rem;
+}
+.ak-wizard-v2-import button {
+  flex-shrink: 0;
+  color: var(--ak-green);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.09em;
+}
+
+.ak-wizard-v2-items {
+  display: grid;
+  gap: 0.9rem;
+}
+.ak-wizard-v2-item {
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: clamp(0.9rem, 2vw, 1.1rem);
+}
+.ak-wizard-v2-item-top,
+.ak-wizard-v2-item-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.8rem;
+}
+.ak-wizard-v2-item-top span {
+  color: var(--ak-gold);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-item-title strong {
+  color: var(--ak-text);
+  font-size: 1rem;
+}
+.ak-wizard-v2-item-title small {
+  color: var(--ak-gold);
+  font-family: var(--font-jetbrains), monospace;
+}
+
+.ak-wizard-v2 label {
+  display: grid;
+  gap: 0.45rem;
+  color: var(--ak-text-dim);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2 input,
+.ak-wizard-v2 select,
+.ak-wizard-v2 textarea {
+  width: 100%;
+  min-height: 52px;
+  border: 1px solid var(--ak-line);
+  border-radius: 13px;
+  background: rgba(0, 0, 0, 0.28);
+  color: var(--ak-text);
+  padding: 0.85rem 0.95rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  outline: none;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.ak-wizard-v2 textarea {
+  min-height: 92px;
+  resize: vertical;
+  line-height: 1.45;
+}
+.ak-wizard-v2 input:focus,
+.ak-wizard-v2 select:focus,
+.ak-wizard-v2 textarea:focus {
+  border-color: var(--ak-gold);
+  box-shadow: 0 0 0 3px rgba(255, 201, 60, 0.12);
+}
+
+.ak-wizard-v2-grid-2 {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 0.85rem;
+}
+
+.ak-wizard-v2-icon-btn {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--ak-line);
+  border-radius: 10px;
+  color: var(--ak-text-dim);
+  background: rgba(0, 0, 0, 0.18);
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s var(--ak-smooth);
+}
+.ak-wizard-v2-icon-btn:hover {
+  color: var(--ak-red);
+  border-color: rgba(255, 59, 92, 0.45);
+  transform: translateY(-1px);
+}
+
+.ak-wizard-v2-add,
+.ak-wizard-v2-nav button,
+.ak-wizard-v2-success-actions a,
+.ak-wizard-v2-success-actions button,
+.ak-wizard-v2-copy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 46px;
+  border: 1px solid var(--ak-line);
+  border-radius: 999px;
+  color: var(--ak-text);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 0.75rem 1rem;
+  font-size: 0.86rem;
+  font-weight: 900;
+  transition: transform 0.2s var(--ak-smooth), border-color 0.2s ease, background 0.2s ease;
+}
+.ak-wizard-v2-add {
+  margin-top: 0.9rem;
+  width: 100%;
+  border-color: var(--ak-line-gold);
+  color: var(--ak-gold-1);
+}
+.ak-wizard-v2-add:hover,
+.ak-wizard-v2-nav button:hover,
+.ak-wizard-v2-success-actions a:hover,
+.ak-wizard-v2-success-actions button:hover,
+.ak-wizard-v2-copy:hover {
+  transform: translateY(-1px);
+  border-color: var(--ak-gold);
+}
+
+.ak-wizard-v2-label {
+  display: block;
+  margin: 0.95rem 0 0.55rem;
+  color: var(--ak-text-dim);
+  font-size: 0.74rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-kit {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 0.95rem;
+  border: 1px solid rgba(255, 201, 60, 0.14);
+  border-radius: 15px;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 201, 60, 0.08), transparent 48%),
+    rgba(0, 0, 0, 0.16);
+  padding: 0.85rem;
+}
+.ak-wizard-v2-kit-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.8rem;
+}
+.ak-wizard-v2-kit-head .ak-wizard-v2-label {
+  margin: 0;
+}
+.ak-wizard-v2-kit-head small {
+  max-width: 32rem;
+  color: var(--ak-text-mute);
+  font-size: 0.74rem;
+  line-height: 1.45;
+  text-align: right;
+}
+.ak-wizard-v2-kit-group {
+  display: grid;
+  gap: 0.55rem;
+  border: 1px solid var(--ak-line);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0.75rem;
+}
+.ak-wizard-v2-kit-group[data-kind="required"] {
+  border-color: rgba(255, 201, 60, 0.28);
+}
+.ak-wizard-v2-kit-group[data-kind="optional"] {
+  border-color: rgba(0, 255, 136, 0.18);
+}
+.ak-wizard-v2-kit-group-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.ak-wizard-v2-kit-group-head strong {
+  color: var(--ak-text);
+  font-size: 0.8rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-kit-group-head span {
+  color: var(--ak-text-mute);
+  font-size: 0.72rem;
+  line-height: 1.35;
+  text-align: right;
+}
+.ak-wizard-v2-chips,
+.ak-wizard-v2-photo-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.ak-wizard-v2-chips button,
+.ak-wizard-v2-photo-hints span {
+  min-height: 38px;
+  border: 1px solid var(--ak-line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.20);
+  color: var(--ak-text-dim);
+  padding: 0.55rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.ak-wizard-v2-chips button.is-active {
+  border-color: rgba(0, 255, 136, 0.42);
+  background: rgba(0, 255, 136, 0.08);
+  color: var(--ak-green);
+}
+
+.ak-wizard-v2-drop {
+  display: grid;
+  place-items: center;
+  gap: 0.55rem;
+  width: 100%;
+  min-height: 210px;
+  border: 2px dashed var(--ak-line-gold);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 201, 60, 0.12), transparent 58%),
+    rgba(0, 0, 0, 0.20);
+  color: var(--ak-text);
+  text-align: center;
+  padding: 1.2rem;
+}
+.ak-wizard-v2-drop svg {
+  color: var(--ak-gold);
+}
+.ak-wizard-v2-drop span {
+  color: var(--ak-text-dim);
+  font-size: 0.86rem;
+}
+.ak-wizard-v2-photo-hints {
+  margin-top: 0.85rem;
+  justify-content: center;
+}
+.ak-wizard-v2-photos {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+.ak-wizard-v2-photo {
+  position: relative;
+  aspect-ratio: 1;
+}
+.ak-wizard-v2-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border: 1px solid var(--ak-line);
+  border-radius: 12px;
+}
+.ak-wizard-v2-photo button {
+  position: absolute;
+  top: 0.35rem;
+  right: 0.35rem;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.72);
+  color: var(--ak-text);
+}
+
+.ak-wizard-v2-review {
+  display: grid;
+  gap: 0.65rem;
+}
+.ak-wizard-v2-summary-line {
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  gap: 1rem;
+  align-items: center;
+  border-bottom: 1px solid var(--ak-line);
+  padding-block: 0.75rem;
+}
+.ak-wizard-v2-summary-line strong {
+  color: var(--ak-text);
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.ak-wizard-v2-consents {
+  display: grid;
+  gap: 0.75rem;
+  margin-top: 1.15rem;
+}
+.ak-wizard-v2-consents label {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+  color: var(--ak-text-dim);
+  letter-spacing: 0;
+  text-transform: none;
+}
+.ak-wizard-v2-consents input {
+  width: 20px;
+  min-width: 20px;
+  height: 20px;
+  min-height: 20px;
+  margin-top: 0.1rem;
+  accent-color: var(--ak-gold);
+}
+.ak-wizard-v2-consents a {
+  color: var(--ak-gold);
+  text-decoration: underline;
+}
+
+.ak-wizard-v2-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  margin-top: 1.25rem;
+  border-top: 1px solid var(--ak-line);
+  padding-top: 1rem;
+}
+.ak-wizard-v2-nav span {
+  color: var(--ak-text-mute);
+  font-size: 0.82rem;
+  font-weight: 900;
+}
+.ak-wizard-v2-nav button:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+  transform: none;
+}
+.ak-wizard-v2-nav button.is-primary,
+.ak-wizard-v2-success-actions a {
+  border: none;
+  background: var(--ak-gold-grad);
+  color: #251500;
+  box-shadow: 0 14px 42px rgba(255, 170, 30, 0.30);
+}
+
+.ak-wizard-v2-success {
+  max-width: 46rem;
+  margin-inline: auto;
+  padding: clamp(1.4rem, 4vw, 2.3rem);
+  text-align: center;
+}
+.ak-wizard-v2-success-icon {
+  display: grid;
+  place-items: center;
+  width: 72px;
+  height: 72px;
+  margin: 0 auto 1rem;
+  border-radius: 22px;
+  border: 1px solid rgba(0, 255, 136, 0.34);
+  color: var(--ak-green);
+  background: rgba(0, 255, 136, 0.08);
+  box-shadow: var(--ak-glow-green);
+}
+.ak-wizard-v2-success h3 {
+  margin-top: 0.65rem;
+  color: var(--ak-text);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 900;
+}
+.ak-wizard-v2-success p {
+  margin-top: 0.55rem;
+  color: var(--ak-text-dim);
+}
+.ak-wizard-v2-id {
+  display: grid;
+  gap: 0.45rem;
+  margin-top: 1.25rem;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: rgba(0, 0, 0, 0.20);
+  padding: 1rem;
+}
+.ak-wizard-v2-id span {
+  color: var(--ak-text-mute);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-id strong {
+  color: var(--ak-text);
+  font-family: var(--font-jetbrains), monospace;
+  word-break: break-all;
+}
+.ak-wizard-v2-success-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.7rem;
+  margin-top: 1.25rem;
+}
+
+.ak-wizard-v2-direct {
+  max-width: 72rem;
+  margin: 1rem auto 0;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 1rem 1.1rem;
+}
+.ak-wizard-v2-direct p {
+  color: var(--ak-text);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.ak-wizard-v2-direct span {
+  display: block;
+  margin-top: 0.25rem;
+  color: var(--ak-text-dim);
+  font-size: 0.9rem;
+}
+.ak-wizard-v2-direct a {
+  color: var(--ak-gold);
+  font-weight: 800;
+}
+
+/* ============================================================
+   PHASE 5 - AnkaufFunnelV3 / fokussierter Ankauf-Automat
+   ============================================================ */
+.ak-stage.ak-funnel-v3 {
+  min-height: 100svh;
+  background:
+    linear-gradient(rgba(255, 201, 60, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 201, 60, 0.03) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 42% at 50% 0%, rgba(255, 201, 60, 0.13), transparent 70%),
+    linear-gradient(180deg, #07070b 0%, #0a0911 50%, #050508 100%);
+  background-size: 44px 44px, 44px 44px, auto, auto;
+}
+.ak-funnel-v3-screen {
+  min-height: 100svh;
+  scroll-margin-top: 74px;
+  padding-block: clamp(2.4rem, 5vw, 4.8rem);
+}
+.ak-funnel-v3-shell {
+  width: min(100% - 2rem, 1320px);
+  margin-inline: auto;
+}
+.ak-funnel-v3-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 360px);
+  gap: clamp(1rem, 3vw, 2rem);
+  align-items: end;
+  margin-bottom: 1rem;
+}
+.ak-funnel-v3-hero h1 {
+  max-width: 760px;
+  margin-top: 0.7rem;
+  color: var(--ak-text);
+  font-size: clamp(2.65rem, 7vw, 6.9rem);
+  line-height: 0.88;
+}
+.ak-funnel-v3-hero p {
+  max-width: 620px;
+  margin-top: 0.9rem;
+  color: var(--ak-text-dim);
+  font-size: clamp(0.98rem, 2vw, 1.15rem);
+  line-height: 1.6;
+}
+.ak-funnel-v3-progress {
+  display: grid;
+  grid-template-columns: 1fr 42px 1fr;
+  gap: 0.55rem;
+  align-items: center;
+  border: 1px solid var(--ak-line);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at 16% 0%, rgba(255, 201, 60, 0.12), transparent 56%),
+    rgba(255, 255, 255, 0.025);
+  padding: 0.75rem;
+}
+.ak-funnel-v3-progress span {
+  display: grid;
+  place-items: center;
+  gap: 0.32rem;
+  min-height: 82px;
+  border: 1px solid var(--ak-line);
+  border-radius: 14px;
+  color: var(--ak-text-mute);
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-align: center;
+  text-transform: uppercase;
+}
+.ak-funnel-v3-progress span i {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 11px;
+  background: rgba(0, 0, 0, 0.2);
+  color: var(--ak-text-dim);
+  font-family: var(--font-jetbrains), monospace;
+  font-style: normal;
+}
+.ak-funnel-v3-progress span.is-active {
+  border-color: var(--ak-gold);
+  color: var(--ak-gold);
+  background: rgba(255, 201, 60, 0.07);
+  box-shadow: inset 0 0 0 1px rgba(255, 201, 60, 0.28);
+}
+.ak-funnel-v3-progress span.is-done {
+  border-color: rgba(0, 255, 136, 0.24);
+  color: var(--ak-green);
+  background: rgba(0, 255, 136, 0.055);
+}
+.ak-funnel-v3-progress b {
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--ak-gold), rgba(0, 255, 136, 0.42));
+  box-shadow: var(--ak-glow-gold);
+}
+.ak-funnel-v3-trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-bottom: 1rem;
+}
+.ak-funnel-v3-trust span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-height: 38px;
+  border: 1px solid rgba(0, 255, 136, 0.18);
+  border-radius: 999px;
+  background: rgba(0, 255, 136, 0.045);
+  color: var(--ak-text-dim);
+  padding: 0.48rem 0.72rem;
+  font-size: 0.78rem;
+  font-weight: 850;
+}
+.ak-funnel-v3-trust svg {
+  color: var(--ak-green);
+}
+.ak-funnel-v3-tool {
+  position: relative;
+}
+.ak-funnel-v3-tool .ak-price-tool {
+  max-width: none;
+}
+.ak-funnel-v3-tool .ak-tool-footer p::after {
+  content: " Erst enthullen, dann starten.";
+  color: var(--ak-gold);
+}
+.ak-funnel-v3-proof {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  margin-top: 1rem;
+}
+.ak-funnel-v3-proof div {
+  display: grid;
+  grid-template-columns: 34px 1fr;
+  gap: 0.62rem 0.75rem;
+  align-items: start;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.025);
+  padding: 0.9rem;
+}
+.ak-funnel-v3-proof svg {
+  grid-row: span 2;
+  color: var(--ak-gold);
+}
+.ak-funnel-v3-proof strong {
+  color: var(--ak-text);
+  font-size: 0.9rem;
+}
+.ak-funnel-v3-proof span {
+  color: var(--ak-text-dim);
+  font-size: 0.8rem;
+  line-height: 1.45;
+}
+.ak-funnel-v3-checkout {
+  background:
+    radial-gradient(ellipse 58% 38% at 50% 0%, rgba(0, 255, 136, 0.09), transparent 72%),
+    linear-gradient(180deg, rgba(6, 6, 10, 0.5), rgba(6, 6, 10, 0));
+}
+.ak-funnel-v3-checkout-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.9rem;
+  margin-bottom: 1.1rem;
+}
+.ak-funnel-v3-checkout-head button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 42px;
+  border: 1px solid var(--ak-line);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--ak-text);
+  padding: 0.62rem 0.9rem;
+  font-size: 0.82rem;
+  font-weight: 900;
+  transition: transform 0.2s var(--ak-smooth), border-color 0.2s ease;
+}
+.ak-funnel-v3-checkout-head button:hover {
+  transform: translateY(-1px);
+  border-color: var(--ak-gold);
+}
+.ak-funnel-v3-checkout-head span {
+  border: 1px solid rgba(0, 255, 136, 0.2);
+  border-radius: 999px;
+  color: var(--ak-green);
+  padding: 0.52rem 0.72rem;
+  font-size: 0.72rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.ak-funnel-v3-wizard-heading {
+  margin-bottom: 1.2rem;
+}
+
+@media (max-width: 900px) {
+  .ak-funnel-v3-hero,
+  .ak-funnel-v3-proof {
+    grid-template-columns: 1fr;
+  }
+  .ak-funnel-v3-progress {
+    max-width: 420px;
+  }
+}
+
+@media (max-width: 620px) {
+  .ak-funnel-v3-screen {
+    scroll-margin-top: 68px;
+    padding-block: 1.75rem 4.5rem;
+  }
+  .ak-funnel-v3-shell {
+    width: min(100% - 1rem, 1320px);
+  }
+  .ak-funnel-v3-hero {
+    gap: 0.9rem;
+  }
+  .ak-funnel-v3-hero h1 {
+    font-size: clamp(2.45rem, 15vw, 4.2rem);
+  }
+  .ak-funnel-v3-progress {
+    grid-template-columns: 1fr 28px 1fr;
+    padding: 0.5rem;
+  }
+  .ak-funnel-v3-progress span {
+    min-height: 64px;
+    font-size: 0.62rem;
+  }
+  .ak-funnel-v3-trust {
+    gap: 0.45rem;
+  }
+  .ak-funnel-v3-trust span {
+    font-size: 0.72rem;
+  }
+  .ak-funnel-v3-proof div {
+    padding: 0.78rem;
+  }
+  .ak-funnel-v3-checkout-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ak-funnel-v3-checkout-head button,
+  .ak-funnel-v3-checkout-head span {
+    justify-content: center;
+  }
+}
+
+/* ============================================================
+   LIGHT MODE — warmes Elfenbein + tiefes Gold
+   Aktiv wenn KEINE .dark-Klasse am <html> (Theme-Toggle).
+   Scope: Ankauf-Tools (Preis-Tool + Wizard) + Tool-Section.
+   Dark Mode bleibt unberuehrt (alle Regeln :not(.dark)).
+   ============================================================ */
+:root:not(.dark) .ak-stage {
+  --ak-black: #fbf8f1;
+  --ak-bg: #faf6ec;
+  --ak-bg-soft: #f1e9d7;
+  --ak-surface: #fffdf8;
+  --ak-surface-2: #f6f0e2;
+  --ak-line: rgba(60, 45, 10, 0.14);
+  --ak-line-gold: rgba(170, 115, 10, 0.34);
+
+  --ak-gold-1: #9a5b00;
+  --ak-gold: #b26a00;
+  --ak-gold-2: #c8881c;
+
+  --ak-green: #0e9b57;
+  --ak-red: #d81b49;
+  --ak-blue: #0e86a8;
+
+  --ak-text: #221a10;
+  --ak-text-dim: rgba(34, 26, 16, 0.66);
+  --ak-text-mute: rgba(34, 26, 16, 0.46);
+
+  /* Glows quasi aus, aber list-valide (kein "none" wegen box-shadow-Listen) */
+  --ak-glow-gold: 0 0 0 rgba(0, 0, 0, 0);
+  --ak-glow-green: 0 0 0 rgba(0, 0, 0, 0);
+  --ak-glow-red: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+/* Tool-Section hell, dunkle Deko-Gradients aus */
+:root:not(.dark) .ak-stage.ak-tool-section {
+  background: var(--ak-bg);
+}
+:root:not(.dark) .ak-stage.ak-tool-section::before,
+:root:not(.dark) .ak-stage.ak-tool-section::after {
+  display: none;
+}
+
+/* Grosser Tool-Container */
+:root:not(.dark) .ak-stage .ak-price-tool {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 201, 60, 0.18), transparent 34%),
+    linear-gradient(155deg, #fffdf8, #f6f0e2);
+  box-shadow: 0 26px 70px rgba(60, 45, 10, 0.10);
+}
+
+/* Panels hell + dezenter Gold-Schimmer */
+:root:not(.dark) .ak-stage .ak-picker-panel,
+:root:not(.dark) .ak-stage .ak-paket-panel,
+:root:not(.dark) .ak-stage .ak-wizard-v2-side,
+:root:not(.dark) .ak-stage .ak-wizard-v2-main,
+:root:not(.dark) .ak-stage .ak-wizard-v2-success {
+  background:
+    radial-gradient(circle at 24% 0%, rgba(255, 201, 60, 0.16), transparent 46%),
+    #fffdf8;
+  box-shadow: 0 18px 50px rgba(60, 45, 10, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
+
+/* Erhabene Kacheln / Sekundaer-Buttons (warmer Sand) */
+:root:not(.dark) .ak-stage .ak-mode-tab,
+:root:not(.dark) .ak-stage .ak-config-step,
+:root:not(.dark) .ak-stage .ak-brand-row button,
+:root:not(.dark) .ak-stage .ak-brand-grid button,
+:root:not(.dark) .ak-stage .ak-family-rail button,
+:root:not(.dark) .ak-stage .ak-model-grid button,
+:root:not(.dark) .ak-stage .ak-search-wrap,
+:root:not(.dark) .ak-stage .ak-search-results button,
+:root:not(.dark) .ak-stage .ak-wizard-v2-item,
+:root:not(.dark) .ak-stage .ak-wizard-v2-kit,
+:root:not(.dark) .ak-stage .ak-wizard-v2-node span,
+:root:not(.dark) .ak-stage .ak-wizard-v2-add,
+:root:not(.dark) .ak-stage .ak-wizard-v2-nav button,
+:root:not(.dark) .ak-stage .ak-wizard-v2-success-actions a,
+:root:not(.dark) .ak-stage .ak-wizard-v2-success-actions button,
+:root:not(.dark) .ak-stage .ak-wizard-v2-copy,
+:root:not(.dark) .ak-stage .ak-wizard-v2-direct {
+  background: #f4eede;
+}
+
+/* Eingaben / versenkte Flaechen (weiss) */
+:root:not(.dark) .ak-stage .ak-field-grid select,
+:root:not(.dark) .ak-stage .ak-config-fields select,
+:root:not(.dark) .ak-stage .ak-add-row input,
+:root:not(.dark) .ak-stage .ak-search-results,
+:root:not(.dark) .ak-stage .ak-wizard-v2 input,
+:root:not(.dark) .ak-stage .ak-wizard-v2 select,
+:root:not(.dark) .ak-stage .ak-wizard-v2 textarea,
+:root:not(.dark) .ak-stage .ak-brand-logo,
+:root:not(.dark) .ak-stage .ak-family-mini,
+:root:not(.dark) .ak-stage .ak-model-visual,
+:root:not(.dark) .ak-stage .ak-loadout-panel,
+:root:not(.dark) .ak-stage .ak-wizard-v2-side-total,
+:root:not(.dark) .ak-stage .ak-wizard-v2-icon-btn,
+:root:not(.dark) .ak-stage .ak-wizard-v2-kit-group,
+:root:not(.dark) .ak-stage .ak-wizard-v2-chips button,
+:root:not(.dark) .ak-stage .ak-wizard-v2-photo-hints span,
+:root:not(.dark) .ak-stage .ak-wizard-v2-id {
+  background: #ffffff;
+}
+
+/* Reveal: Karten / Walzen / Trigger hell */
+:root:not(.dark) .ak-stage .ak-reveal-card,
+:root:not(.dark) .ak-stage .ak-reveal-or span {
+  background: #fffdf8;
+}
+:root:not(.dark) .ak-stage .ak-reveal-trigger {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 201, 60, 0.22), transparent 64%),
+    #fffdf8;
+}
+:root:not(.dark) .ak-stage .ak-reveal-credit {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(0, 200, 110, 0.14), transparent 64%),
+    #fffefb;
+}
+:root:not(.dark) .ak-stage .ak-slot3-reel {
+  background:
+    linear-gradient(180deg, rgba(255, 201, 60, 0.2), transparent 30%, transparent 70%, rgba(255, 201, 60, 0.2)),
+    #fffdf8;
+  box-shadow: inset 0 0 18px rgba(60, 45, 10, 0.08);
+}
+
+/* Foto-Drop hell */
+:root:not(.dark) .ak-stage .ak-wizard-v2-drop {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 201, 60, 0.14), transparent 58%),
+    #fffdf8;
+}
+
+/* Chip / Select-Optionen / Fehlertext lesbar machen */
+:root:not(.dark) .ak-stage .ak-chip {
+  background: rgba(178, 106, 0, 0.08);
+}
+:root:not(.dark) .ak-stage .ak-field-grid option {
+  background: #ffffff;
+  color: #221a10;
+}
+:root:not(.dark) .ak-stage .ak-wizard-v2-error,
+:root:not(.dark) .ak-stage .ak-wizard-v2-warning {
+  color: #b00020;
+}
+
+/* Gold-Verlaufs-Schrift: heller Verlauf war auf Elfenbein unlesbar
+   -> tiefes Gold. WICHTIG: nur background-image setzen, NICHT die
+   background-Shorthand (die wuerde background-clip:text zuruecksetzen
+   und den Verlauf als vollen Kasten statt als Schrift zeigen). */
+:root:not(.dark) .ak-stage .ak-gold-text {
+  background-image: linear-gradient(135deg, #c8881c 0%, #b26a00 46%, #8a4f00 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Neon-Glow im Hellmodus aus (verwaschene Schrift auf hellem Grund) */
+:root:not(.dark) .ak-stage .ak-neon-gold,
+:root:not(.dark) .ak-stage .ak-neon-green,
+:root:not(.dark) .ak-stage .ak-neon-red,
+:root:not(.dark) .ak-stage .ak-neon-blue {
+  text-shadow: none;
+}
+
+/* Leeres-Paket-Hinweis: weisser Text -> dunkel + lesbarer Grund */
+:root:not(.dark) .ak-stage .ak-empty-package {
+  background: #faf6ec;
+  border-color: rgba(60, 45, 10, 0.18);
+  color: var(--ak-text-dim);
+}
+
+/* ── Scroll-Sektionen (Hero + S1–S6) im Hellmodus ──────────────
+   .ak-stage-Token-Remap greift schon; hier nur die fest verdrahteten
+   dunklen Overlays/Flaechen aufhellen, die sonst dunkle Kaesten malen. */
+
+/* S2: dunkler Vignetten-Rand -> heller Elfenbein-Rand */
+:root:not(.dark) .ak-stage .ak-s2-dim {
+  background: radial-gradient(ellipse 60% 55% at 50% 50%, transparent 26%, rgba(250, 246, 236, 0.92) 100%);
+}
+
+/* S5 Proof + S6 FOMO: dunkler Verlauf -> warmer Elfenbein-Verlauf */
+:root:not(.dark) .ak-stage.ak-proof-section,
+:root:not(.dark) .ak-stage.ak-fomo-section {
+  background:
+    radial-gradient(ellipse 58% 38% at 50% 0%, rgba(255, 201, 60, 0.16), transparent 68%),
+    radial-gradient(ellipse 44% 48% at 8% 88%, rgba(54, 224, 255, 0.05), transparent 72%),
+    linear-gradient(180deg, var(--ak-bg) 0%, #f1e9d7 45%, var(--ak-bg) 100%);
+}
+:root:not(.dark) .ak-stage.ak-fomo-section {
+  background:
+    radial-gradient(ellipse 52% 42% at 50% 16%, rgba(216, 27, 73, 0.10), transparent 70%),
+    radial-gradient(ellipse 42% 36% at 74% 86%, rgba(255, 201, 60, 0.13), transparent 68%),
+    linear-gradient(180deg, var(--ak-bg) 0%, #f1e9d7 48%, var(--ak-bg) 100%);
+}
+
+/* Wizard V2: dunkler Arcade-Hintergrund -> heller Missions-Bereich */
+:root:not(.dark) .ak-stage.ak-wizard-v2-section {
+  background:
+    radial-gradient(ellipse 58% 42% at 50% 0%, rgba(255, 201, 60, 0.16), transparent 70%),
+    radial-gradient(ellipse 42% 44% at 88% 42%, rgba(54, 224, 255, 0.05), transparent 68%),
+    linear-gradient(180deg, var(--ak-bg) 0%, #f1e9d7 48%, var(--ak-bg) 100%);
+}
+
+/* FOMO-Kacheln + Timer: dunkle Flaechen -> hell */
+:root:not(.dark) .ak-stage .ak-fomo-metric {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 201, 60, 0.14), transparent 40%),
+    #fffdf8;
+  box-shadow: 0 18px 50px rgba(60, 45, 10, 0.10);
+}
+:root:not(.dark) .ak-stage .ak-fomo-timer {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(255, 201, 60, 0.18), transparent 44%),
+    linear-gradient(160deg, #fffdf8, #f4eede);
+}
+
+/* ── Preis-Tool Sammlung: zuvor unsichtbare/dunkle Flaechen ──────
+   Positions-Karten hatten fast transparenten Grund (verschwanden),
+   das Mengen-Feld hatte sogar einen DUNKLEN Grund (rgba(0,0,0,.22)). */
+:root:not(.dark) .ak-stage .ak-item-row {
+  background: #fffdf8;
+  border-color: var(--ak-line);
+}
+:root:not(.dark) .ak-stage .ak-item-actions input {
+  background: #ffffff;
+}
+/* Alt-Layout-Flaechen defensiv aufhellen, falls noch gerendert */
+:root:not(.dark) .ak-stage .ak-bundle-board,
+:root:not(.dark) .ak-stage .ak-mini-ledger,
+:root:not(.dark) .ak-stage .ak-slot-reel,
+:root:not(.dark) .ak-stage .ak-total-orb {
+  background: #fffdf8;
+  border-color: var(--ak-line);
+}
+
+/* Mute-Text war auf Elfenbein grenzwertig blass -> etwas kraeftiger */
+:root:not(.dark) .ak-stage {
+  --ak-text-mute: rgba(34, 26, 16, 0.56);
+}
+
+/* Bewertungs-Karten (S5) waren dunkel (rgba(16,16,25,.92)) -> hell,
+   damit der dunkle Text darauf wieder lesbar ist. */
+:root:not(.dark) .ak-stage .ak-review-card {
+  background:
+    radial-gradient(circle at 18% 0%, rgba(255, 201, 60, 0.16), transparent 38%),
+    #fffdf8;
+  box-shadow: 0 16px 50px rgba(60, 45, 10, 0.12);
+}
+:root:not(.dark) .ak-stage .ak-review-card:hover {
+  box-shadow: 0 20px 64px rgba(178, 106, 0, 0.18);
+}
+
+/* Live-Ticker (S3): Preis-Gruen fuer Elfenbein etwas dunkler (Kontrast),
+   Neon-Flash-Glow aus (verwaschen auf hellem Grund). */
+:root:not(.dark) .ak-stage {
+  --ak-green: #0b8f50;
+}
+:root:not(.dark) .ak-stage .ak-ticker-price {
+  animation: none;
+  text-shadow: none;
+}
+
+@media (max-width: 900px) {
+  .ak-wizard-v2-shell {
+    grid-template-columns: 1fr;
+  }
+  .ak-wizard-v2-side {
+    position: relative;
+    top: auto;
+    min-height: auto;
+  }
+  .ak-wizard-v2-map {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.35rem;
+  }
+  .ak-wizard-v2-node {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    gap: 0.35rem;
+  }
+  .ak-wizard-v2-node small {
+    display: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .ak-stage.ak-wizard-v2-section {
+    scroll-margin-top: 68px;
+    padding-block: 3.75rem 6.5rem;
+  }
+  .ak-wizard-v2-heading {
+    margin-bottom: 1.35rem;
+  }
+  .ak-wizard-v2-heading h2 {
+    font-size: clamp(2rem, 11vw, 3.2rem);
+  }
+  .ak-wizard-v2-main,
+  .ak-wizard-v2-side,
+  .ak-wizard-v2-success {
+    border-radius: 16px;
+    padding: 0.9rem;
+  }
+  .ak-wizard-v2-grid-2,
+  .ak-wizard-v2-summary-line {
+    grid-template-columns: 1fr;
+  }
+  .ak-wizard-v2-kit-head,
+  .ak-wizard-v2-kit-group-head {
+    display: grid;
+    justify-items: start;
+  }
+  .ak-wizard-v2-kit-head small,
+  .ak-wizard-v2-kit-group-head span {
+    text-align: left;
+  }
+  .ak-wizard-v2-photos {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .ak-wizard-v2-import,
+  .ak-wizard-v2-nav {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .ak-wizard-v2-nav button,
+  .ak-wizard-v2-add {
+    width: 100%;
+  }
+  .ak-wizard-v2-nav span {
+    order: -1;
+    text-align: center;
+  }
+}
+
+/* Light Mode fuer den fokussierten AnkaufFunnelV3 */
+:root:not(.dark) .ak-stage.ak-funnel-v3 {
+  background:
+    linear-gradient(rgba(178, 106, 0, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(178, 106, 0, 0.035) 1px, transparent 1px),
+    radial-gradient(ellipse 70% 42% at 50% 0%, rgba(255, 201, 60, 0.18), transparent 70%),
+    linear-gradient(180deg, #faf6ec 0%, #fffdf8 48%, #f4eede 100%);
+  background-size: 44px 44px, 44px 44px, auto, auto;
+}
+:root:not(.dark) .ak-stage .ak-funnel-v3-progress,
+:root:not(.dark) .ak-stage .ak-funnel-v3-proof div,
+:root:not(.dark) .ak-stage .ak-funnel-v3-checkout-head button {
+  background: #fffdf8;
+}
+:root:not(.dark) .ak-stage .ak-funnel-v3-trust span {
+  background: rgba(14, 155, 87, 0.08);
 }

@@ -31,6 +31,20 @@ const ALLOWED_PHOTO_TYPES = ["image/jpeg", "image/png", "image/webp"];
 const MAX_PHOTO_SIZE = 5 * 1024 * 1024; // 5 MB
 const MAX_PHOTOS = 10;
 
+function parseRecipients(value: string | undefined, fallback: string): string | string[] {
+  const recipients = (value ?? fallback)
+    .split(",")
+    .map((email) => email.trim())
+    .filter(Boolean);
+
+  if (recipients.length === 0) return fallback;
+  return recipients.length === 1 ? recipients[0] : recipients;
+}
+
+function emailResultFailed(result: PromiseSettledResult<{ error?: unknown }>) {
+  return result.status === "rejected" || Boolean(result.value?.error);
+}
+
 export async function POST(req: Request) {
   // Parse FormData
   let formData: FormData;
@@ -200,7 +214,7 @@ export async function POST(req: Request) {
   let emailWarning: string | undefined;
   const FROM =
     process.env.RESEND_FROM_EMAIL ?? "onboarding@resend.dev";
-  const ADMIN = process.env.ADMIN_EMAIL ?? "eren@retroase.de";
+  const ADMIN = parseRecipients(process.env.ADMIN_EMAIL, "eren@retroase.de");
 
   try {
     const resend = new Resend(process.env.RESEND_API_KEY);
@@ -246,10 +260,13 @@ export async function POST(req: Request) {
       }),
     ]);
 
-    const allFailed = emailResults.every((r) => r.status === "rejected");
-    if (allFailed) {
+    const failedEmails = emailResults.filter(emailResultFailed);
+    if (failedEmails.length === emailResults.length) {
       emailWarning = "E-Mail-Benachrichtigung konnte nicht gesendet werden.";
       console.error("[api/ankauf] Both emails failed:", emailResults);
+    } else if (failedEmails.length > 0) {
+      emailWarning = "Eine E-Mail-Benachrichtigung konnte nicht gesendet werden.";
+      console.error("[api/ankauf] Some emails failed:", emailResults);
     }
   } catch (err) {
     emailWarning = "E-Mail-Benachrichtigung konnte nicht gesendet werden.";

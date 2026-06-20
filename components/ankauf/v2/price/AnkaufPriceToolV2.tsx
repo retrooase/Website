@@ -1,10 +1,10 @@
 "use client";
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, ImageIcon, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import {
-  PRICE_COMPLETENESS,
-  PRICE_CONDITIONS,
+  FALLBACK_PRICE_CATALOG,
   calculateRange,
   getBrands,
   getCompletenessById,
@@ -15,6 +15,8 @@ import {
   searchVariants,
   type CompletenessId,
   type ConditionId,
+  type DemandLevel,
+  type PriceCatalogData,
   type PriceRange,
   type PriceVariant,
 } from "./priceCatalog";
@@ -34,10 +36,6 @@ interface LineItem {
 
 const DEFAULT_CONDITION: ConditionId = "good";
 const DEFAULT_COMPLETENESS: CompletenessId = "complete";
-
-// P10: Trade-In-Bonus — als RetrOase-Guthaben gibt es mehr als bei Sofort-Auszahlung.
-// Bewusst ein einzelner Faktor; spaeter ueber den Preis-Admin (Supabase) steuerbar.
-const STORE_CREDIT_BONUS = 0.1;
 
 // Symbole fuer die rotierenden Slot-Walzen waehrend der Aufdeckung.
 const SLOT_SYMBOLS = ["🎮", "🕹️", "👾", "💎", "🪙", "⭐", "🏆", "💰"];
@@ -62,11 +60,206 @@ function extractQuantityFromText(value: string) {
   return match ? clampQuantity(Number(match[1])) : null;
 }
 
-export function AnkaufPriceToolV2() {
+function normalizeConfigText(value: string) {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/ÃŸ/g, "ss");
+}
+
+function cleanList(values: Array<string | null | undefined>) {
+  const seen = new Set<string>();
+  return values
+    .map((value) => value?.trim())
+    .filter((value): value is string => Boolean(value))
+    .filter((value) => {
+      const key = normalizeConfigText(value);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+}
+
+function canRenderImage(src?: string | null) {
+  if (!src) return false;
+  if (src.startsWith("/")) return true;
+  try {
+    const url = new URL(src);
+    return (
+      url.hostname.endsWith(".supabase.co") ||
+      url.hostname === "i.ebayimg.com" ||
+      url.hostname === "placehold.co"
+    );
+  } catch {
+    return false;
+  }
+}
+
+function getVariantImage(variant?: PriceVariant | null) {
+  return variant?.imageUrl ?? variant?.familyImageUrl ?? null;
+}
+
+function getBrandLogo(brand: string, variants: PriceVariant[]) {
+  return variants.find((variant) => variant.brand === brand && variant.brandLogoUrl)?.brandLogoUrl ?? null;
+}
+
+function getBrandMark(brand: string) {
+  const normalized = normalizeConfigText(brand);
+  if (normalized.includes("nintendo")) return "N";
+  if (normalized.includes("sony") || normalized.includes("playstation")) return "PS";
+  if (normalized.includes("microsoft") || normalized.includes("xbox")) return "X";
+  if (normalized.includes("pokemon")) return "PK";
+  if (normalized.includes("zubehor")) return "ZB";
+  return brand.slice(0, 2).toUpperCase();
+}
+
+function getTypeLabel(type: PriceVariant["type"]) {
+  const labels: Record<PriceVariant["type"], string> = {
+    console: "Konsole",
+    handheld: "Handheld",
+    game: "Spiel",
+    cards: "Karten",
+    accessory: "Zubehor",
+    bundle: "Bundle",
+  };
+  return labels[type];
+}
+
+function getDemandLabel(demand: DemandLevel) {
+  if (demand === "hot") return "gefragt";
+  if (demand === "niche") return "speziell";
+  return "stabil";
+}
+
+function getEquipmentPlan(variant?: PriceVariant | null) {
+  const required = cleanList(variant?.requiredAccessories ?? []);
+  const optional = cleanList(variant?.optionalAccessories ?? []);
+  if (required.length || optional.length) return { required, optional, source: "catalog" as const };
+
+  const text = normalizeConfigText([variant?.brand, variant?.family, variant?.name, variant?.type].filter(Boolean).join(" "));
+
+  if (!variant) return { required: ["Produkt"], optional: ["Originalverpackung", "Zubehor"], source: "fallback" as const };
+  if (variant.type === "cards" || text.includes("karten") || text.includes("pokemon")) {
+    return {
+      required: ["Karten"],
+      optional: ["Binder", "Sleeves", "Toploader"],
+      source: "fallback" as const,
+    };
+  }
+  if (variant.type === "game" || text.includes("spiel")) {
+    return {
+      required: ["Spielmodul / Disc"],
+      optional: ["Originalverpackung", "Anleitung", "Schutzhulle"],
+      source: "fallback" as const,
+    };
+  }
+  if (text.includes("switch lite")) {
+    return {
+      required: ["Ladegerat / Netzteil"],
+      optional: ["Originalverpackung", "Tasche", "Displayschutz"],
+      source: "fallback" as const,
+    };
+  }
+  if (text.includes("switch")) {
+    return {
+      required: ["Dock", "Joy-Con links/rechts", "Netzteil", "HDMI-Kabel"],
+      optional: ["Originalverpackung", "Joy-Con-Grip", "Handgelenkschlaufen"],
+      source: "fallback" as const,
+    };
+  }
+  if (text.includes("ds") || text.includes("3ds") || text.includes("gba sp")) {
+    return {
+      required: ["Ladegerat / Netzteil", "Stift / Stylus"],
+      optional: ["Originalverpackung", "Anleitung", "Tasche"],
+      source: "fallback" as const,
+    };
+  }
+  if (text.includes("game boy") || text.includes("gameboy")) {
+    return {
+      required: ["Batteriedeckel"],
+      optional: ["Originalverpackung", "Anleitung", "Tasche"],
+      source: "fallback" as const,
+    };
+  }
+  if (text.includes("playstation") || text.includes("ps5") || text.includes("ps4") || text.includes("xbox")) {
+    return {
+      required: ["Controller", "Netzteil", "HDMI-Kabel"],
+      optional: ["Originalverpackung", "Anleitung", "Zweiter Controller"],
+      source: "fallback" as const,
+    };
+  }
+
+  return {
+    required: ["Produkt", "Kabel / Netzteil"],
+    optional: ["Originalverpackung", "Anleitung", "Weiteres Zubehor"],
+    source: "fallback" as const,
+  };
+}
+
+function VisualImage({
+  src,
+  alt,
+  className,
+  sizes,
+}: {
+  src?: string | null;
+  alt: string;
+  className?: string;
+  sizes: string;
+}) {
+  if (!src || !canRenderImage(src)) return null;
+  const imageSrc = src;
+  return (
+    <Image
+      src={imageSrc}
+      alt={alt}
+      fill
+      sizes={sizes}
+      className={className}
+      unoptimized={imageSrc.startsWith("http")}
+    />
+  );
+}
+
+function ProductFallback({ variant }: { variant?: PriceVariant | null }) {
+  return (
+    <div className="ak-product-fallback" aria-hidden="true">
+      <ImageIcon size={22} />
+      <strong>{variant ? getBrandMark(variant.name) : "RO"}</strong>
+      <span>{variant ? getTypeLabel(variant.type) : "Produkt"}</span>
+    </div>
+  );
+}
+
+type AnkaufPriceToolV2Props = {
+  catalog?: PriceCatalogData;
+  offerCtaLabel?: string;
+  onOfferStart?: () => void;
+  requireRevealBeforeOffer?: boolean;
+};
+
+export function AnkaufPriceToolV2({
+  catalog = FALLBACK_PRICE_CATALOG,
+  offerCtaLabel,
+  onOfferStart,
+  requireRevealBeforeOffer = false,
+}: AnkaufPriceToolV2Props) {
+  const catalogVariants = catalog.variants.length ? catalog.variants : FALLBACK_PRICE_CATALOG.variants;
+  const catalogConditions = catalog.conditions.length ? catalog.conditions : FALLBACK_PRICE_CATALOG.conditions;
+  const catalogCompleteness = catalog.completeness.length
+    ? catalog.completeness
+    : FALLBACK_PRICE_CATALOG.completeness;
+  const storeCreditBonus = Math.max(0, Math.min(0.5, catalog.storeCreditBonus));
+  const initialVariant =
+    catalogVariants.find((variant) => variant.id === "nintendo-ds-lite") ??
+    catalogVariants[0] ??
+    FALLBACK_PRICE_CATALOG.variants[0];
+
   const [mode, setMode] = useState<SellMode>("single");
-  const [brand, setBrand] = useState("Nintendo");
-  const [family, setFamily] = useState("Nintendo DS");
-  const [variantId, setVariantId] = useState("nintendo-ds-lite");
+  const [brand, setBrand] = useState(initialVariant?.brand ?? "Nintendo");
+  const [family, setFamily] = useState(initialVariant?.family ?? "Nintendo DS");
+  const [variantId, setVariantId] = useState(initialVariant?.id ?? "nintendo-ds-lite");
   const [condition, setCondition] = useState<ConditionId>(DEFAULT_CONDITION);
   const [completeness, setCompleteness] = useState<CompletenessId>(DEFAULT_COMPLETENESS);
   const [quantity, setQuantity] = useState(1);
@@ -76,15 +269,33 @@ export function AnkaufPriceToolV2() {
   const [reveal, setReveal] = useState<"idle" | "rolling" | "done">("idle");
   const [progress, setProgress] = useState(0);
 
-  const brands = useMemo(() => getBrands(), []);
-  const families = useMemo(() => getFamilies(brand), [brand]);
-  const variants = useMemo(() => getVariants(brand, family), [brand, family]);
-  const searchResults = useMemo(() => searchVariants(query), [query]);
+  const brands = useMemo(() => getBrands(catalogVariants), [catalogVariants]);
+  const families = useMemo(() => getFamilies(brand, catalogVariants), [brand, catalogVariants]);
+  const variants = useMemo(() => getVariants(brand, family, catalogVariants), [brand, family, catalogVariants]);
+  const searchResults = useMemo(() => searchVariants(query, catalogVariants), [query, catalogVariants]);
 
-  const selectedVariant = getVariantById(variantId);
+  const selectedVariant = getVariantById(variantId, catalogVariants);
   const selectedRange = selectedVariant
-    ? calculateRange(selectedVariant, condition, completeness, quantity)
+    ? calculateRange(selectedVariant, condition, completeness, quantity, catalogConditions, catalogCompleteness)
     : null;
+  const selectedEquipment = useMemo(() => getEquipmentPlan(selectedVariant), [selectedVariant]);
+
+  useEffect(() => {
+    if (getVariantById(variantId, catalogVariants) || catalogVariants.length === 0) return;
+    const nextVariant = catalogVariants[0];
+    setBrand(nextVariant.brand);
+    setFamily(nextVariant.family);
+    setVariantId(nextVariant.id);
+  }, [catalogVariants, variantId]);
+
+  useEffect(() => {
+    if (!catalogConditions.some((item) => item.id === condition) && catalogConditions[0]) {
+      setCondition(catalogConditions[0].id);
+    }
+    if (!catalogCompleteness.some((item) => item.id === completeness) && catalogCompleteness[0]) {
+      setCompleteness(catalogCompleteness[0].id);
+    }
+  }, [catalogCompleteness, catalogConditions, completeness, condition]);
 
   // Der EINE Wert, der am Ende enthuellt wird: im Einzel-Modus das aktuelle Produkt,
   // im Sammlungs-Modus die Summe des Pakets.
@@ -93,8 +304,8 @@ export function AnkaufPriceToolV2() {
   const activeMin = activeRange[0];
   const activeMax = activeRange[1];
   const creditRange: PriceRange = [
-    activeMin * (1 + STORE_CREDIT_BONUS),
-    activeMax * (1 + STORE_CREDIT_BONUS),
+    activeMin * (1 + storeCreditBonus),
+    activeMax * (1 + storeCreditBonus),
   ];
   const canReveal =
     mode === "single" ? Boolean(selectedVariant && selectedRange) : items.length > 0;
@@ -164,15 +375,15 @@ export function AnkaufPriceToolV2() {
   }
 
   function handleBrandChange(nextBrand: string) {
-    const nextFamily = getFamilies(nextBrand)[0] ?? "";
-    const nextVariant = nextFamily ? getVariants(nextBrand, nextFamily)[0] : null;
+    const nextFamily = getFamilies(nextBrand, catalogVariants)[0] ?? "";
+    const nextVariant = nextFamily ? getVariants(nextBrand, nextFamily, catalogVariants)[0] : null;
     setBrand(nextBrand);
     setFamily(nextFamily);
     setVariantId(nextVariant?.id ?? "");
   }
 
   function handleFamilyChange(nextFamily: string) {
-    const nextVariant = getVariants(brand, nextFamily)[0] ?? null;
+    const nextVariant = getVariants(brand, nextFamily, catalogVariants)[0] ?? null;
     setFamily(nextFamily);
     setVariantId(nextVariant?.id ?? "");
   }
@@ -202,10 +413,21 @@ export function AnkaufPriceToolV2() {
     setItems((current) =>
       current.map((item) => {
         if (item.id !== id) return item;
-        const variant = getVariantById(item.variantId);
+        const variant = getVariantById(item.variantId, catalogVariants);
         const amount = clampQuantity(nextQuantity);
         return variant
-          ? { ...item, quantity: amount, range: calculateRange(variant, item.condition, item.completeness, amount) }
+          ? {
+              ...item,
+              quantity: amount,
+              range: calculateRange(
+                variant,
+                item.condition,
+                item.completeness,
+                amount,
+                catalogConditions,
+                catalogCompleteness,
+              ),
+            }
           : item;
       }),
     );
@@ -228,25 +450,37 @@ export function AnkaufPriceToolV2() {
             ]
           : [];
     try {
-      localStorage.setItem(
-        "retroase_price_tool_items",
-        JSON.stringify(
-          source.map((item) => {
-            const variant = getVariantById(item.variantId);
+      const items = source.map((item) => {
+            const variant = getVariantById(item.variantId, catalogVariants);
             return {
+              variantId: item.variantId,
               name: variant?.name,
               brand: variant?.brand,
               family: variant?.family,
               quantity: item.quantity,
-              condition: getConditionById(item.condition).label,
-              completeness: getCompletenessById(item.completeness).label,
+              condition: getConditionById(item.condition, catalogConditions).label,
+              completeness: getCompletenessById(item.completeness, catalogCompleteness).label,
               range: item.range,
             };
-          }),
-        ),
+          });
+
+      localStorage.setItem(
+        "retroase_price_tool_items",
+        JSON.stringify({
+          version: 2,
+          source: "ankauf-price-tool-v2",
+          mode,
+          savedAt: Date.now(),
+          items,
+        }),
       );
     } catch {
       // Lokale Speicherung ist nur Komfort, der CTA darf trotzdem funktionieren.
+    }
+
+    if (onOfferStart) {
+      onOfferStart();
+      return;
     }
 
     document.getElementById("angebot")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -292,7 +526,7 @@ export function AnkaufPriceToolV2() {
         </div>
       </div>
 
-      {/* Eingabe: grosse, klare Felder */}
+      {/* Eingabe: visueller Setup-Builder */}
       <section className="ak-picker-panel" aria-label="Produkt auswählen">
         <label className="ak-price-label" htmlFor="ak-price-search">
           {mode === "single" ? "Was möchtest du verkaufen?" : "Produkt suchen"}
@@ -324,7 +558,213 @@ export function AnkaufPriceToolV2() {
           </div>
         )}
 
-        <div className="ak-picker-stack">
+        <div className="ak-config-step">
+          <div className="ak-config-step-head">
+            <span className="ak-config-step-number">01</span>
+            <div>
+              <span className="ak-price-label">Marke</span>
+              <strong>Waehl dein System</strong>
+            </div>
+          </div>
+          <div className="ak-brand-grid" role="listbox" aria-label="Marke">
+            {brands.map((item) => {
+              const logo = getBrandLogo(item, catalogVariants);
+              const count = catalogVariants.filter((variant) => variant.brand === item).length;
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={item === brand ? "is-active" : ""}
+                  onClick={() => handleBrandChange(item)}
+                  aria-selected={item === brand}
+                >
+                  <span className="ak-brand-logo">
+                    <VisualImage
+                      src={logo}
+                      alt={`${item} Logo`}
+                      className="ak-brand-logo-img"
+                      sizes="72px"
+                    />
+                    {!canRenderImage(logo) && <strong>{getBrandMark(item)}</strong>}
+                  </span>
+                  <span>
+                    {item}
+                    <small>{count} Option{count === 1 ? "" : "en"}</small>
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="ak-config-step">
+          <div className="ak-config-step-head">
+            <span className="ak-config-step-number">02</span>
+            <div>
+              <span className="ak-price-label">Reihe</span>
+              <strong>Grenz es ein</strong>
+            </div>
+          </div>
+          <div className="ak-family-rail" role="listbox" aria-label="Reihe">
+            {families.map((item) => {
+              const familyVariants = getVariants(brand, item, catalogVariants);
+              const image = getVariantImage(familyVariants[0]);
+              return (
+                <button
+                  key={item}
+                  type="button"
+                  className={item === family ? "is-active" : ""}
+                  onClick={() => handleFamilyChange(item)}
+                  aria-selected={item === family}
+                >
+                  <span className="ak-family-mini">
+                    <VisualImage
+                      src={image}
+                      alt={item}
+                      className="ak-family-mini-img"
+                      sizes="54px"
+                    />
+                    {!canRenderImage(image) && <span>{getBrandMark(item)}</span>}
+                  </span>
+                  <strong>{item}</strong>
+                  <small>{familyVariants.length} Modell{familyVariants.length === 1 ? "" : "e"}</small>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="ak-config-step">
+          <div className="ak-config-step-head">
+            <span className="ak-config-step-number">03</span>
+            <div>
+              <span className="ak-price-label">Modell</span>
+              <strong>Such dir die genaue Version aus</strong>
+            </div>
+          </div>
+          <div className="ak-model-grid" role="listbox" aria-label="Modell">
+            {variants.map((variant) => {
+              const image = getVariantImage(variant);
+              const equipment = getEquipmentPlan(variant);
+              const active = variant.id === variantId;
+              return (
+                <button
+                  key={variant.id}
+                  type="button"
+                  className={active ? "is-active" : ""}
+                  onClick={() => setVariantId(variant.id)}
+                  aria-selected={active}
+                >
+                  <span className="ak-model-visual">
+                    <VisualImage
+                      src={image}
+                      alt={variant.name}
+                      className="ak-model-img"
+                      sizes="(max-width: 620px) 42vw, 180px"
+                    />
+                    {!canRenderImage(image) && <ProductFallback variant={variant} />}
+                    {active && (
+                      <span className="ak-model-check">
+                        <CheckCircle2 size={16} />
+                      </span>
+                    )}
+                  </span>
+                  <span className="ak-model-copy">
+                    <small>{getTypeLabel(variant.type)} / {getDemandLabel(variant.demand)}</small>
+                    <strong>{variant.name}</strong>
+                    <em>{formatEuro(variant.baseRange[0])} - {formatEuro(variant.baseRange[1])}</em>
+                  </span>
+                  <span className="ak-model-equipment">
+                    {[...equipment.required, ...equipment.optional].slice(0, 3).map((entry) => (
+                      <i key={entry}>{entry}</i>
+                    ))}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="ak-config-details">
+          <div className="ak-config-fields">
+            <label>
+              <span className="ak-price-label">Zustand</span>
+              <select value={condition} onChange={(event) => setCondition(event.target.value as ConditionId)}>
+                {catalogConditions.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+              <small>{getConditionById(condition, catalogConditions).hint}</small>
+            </label>
+
+            <label>
+              <span className="ak-price-label">Vollstaendigkeit</span>
+              <select
+                value={completeness}
+                onChange={(event) => setCompleteness(event.target.value as CompletenessId)}
+              >
+                {catalogCompleteness.map((item) => (
+                  <option key={item.id} value={item.id}>
+                    {item.label}
+                  </option>
+                ))}
+              </select>
+              <small>{getCompletenessById(completeness, catalogCompleteness).hint}</small>
+            </label>
+          </div>
+
+          <div className="ak-loadout-panel">
+            <div className="ak-loadout-head">
+              <span className="ak-price-label">Ausstattung</span>
+              <strong>{selectedVariant?.name ?? "Produkt"}</strong>
+            </div>
+            <div className="ak-loadout-groups">
+              <div>
+                <span>Wichtig</span>
+                {selectedEquipment.required.map((entry) => (
+                  <p key={entry}>
+                    <CheckCircle2 size={14} />
+                    {entry}
+                  </p>
+                ))}
+              </div>
+              {selectedEquipment.optional.length > 0 && (
+                <div>
+                  <span>Optional</span>
+                  {selectedEquipment.optional.map((entry) => (
+                    <p key={entry}>
+                      <Plus size={14} />
+                      {entry}
+                    </p>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {mode === "collection" && (
+            <div className="ak-add-row">
+              <label>
+                <span className="ak-price-label">Anzahl</span>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  value={quantity}
+                  onChange={(event) => setQuantity(clampQuantity(Number(event.target.value)))}
+                />
+              </label>
+              <button type="button" className="ak-add-item" onClick={addItem} disabled={!selectedVariant}>
+                <Plus size={20} />
+                Produkt hinzufuegen
+              </button>
+            </div>
+          )}
+        </div>
+
+        <div className="ak-picker-stack ak-picker-stack-legacy" hidden>
           <div>
             <span className="ak-price-label">Marke</span>
             <div className="ak-brand-row">
@@ -369,13 +809,13 @@ export function AnkaufPriceToolV2() {
             <label>
               <span className="ak-price-label">Zustand</span>
               <select value={condition} onChange={(event) => setCondition(event.target.value as ConditionId)}>
-                {PRICE_CONDITIONS.map((item) => (
+                {catalogConditions.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.label}
                   </option>
                 ))}
               </select>
-              <small>{getConditionById(condition).hint}</small>
+              <small>{getConditionById(condition, catalogConditions).hint}</small>
             </label>
 
             <label>
@@ -384,13 +824,13 @@ export function AnkaufPriceToolV2() {
                 value={completeness}
                 onChange={(event) => setCompleteness(event.target.value as CompletenessId)}
               >
-                {PRICE_COMPLETENESS.map((item) => (
+                {catalogCompleteness.map((item) => (
                   <option key={item.id} value={item.id}>
                     {item.label}
                   </option>
                 ))}
               </select>
-              <small>{getCompletenessById(completeness).hint}</small>
+              <small>{getCompletenessById(completeness, catalogCompleteness).hint}</small>
             </label>
           </div>
 
@@ -438,7 +878,7 @@ export function AnkaufPriceToolV2() {
               </div>
             ) : (
               items.map((item) => {
-                const variant = getVariantById(item.variantId);
+                const variant = getVariantById(item.variantId, catalogVariants);
                 if (!variant) return null;
                 return (
                   <article key={item.id} className="ak-item-row">
@@ -448,7 +888,8 @@ export function AnkaufPriceToolV2() {
                         {variant.name}
                       </strong>
                       <span>
-                        {variant.brand} / {variant.family} · {getConditionById(item.condition).label}
+                        {variant.brand} / {variant.family} ·{" "}
+                        {getConditionById(item.condition, catalogConditions).label}
                       </span>
                     </div>
                     <div className="ak-item-actions">
@@ -485,7 +926,8 @@ export function AnkaufPriceToolV2() {
               <strong>{selectedVariant.name}</strong>
               <span>
                 {selectedVariant.brand} / {selectedVariant.family} ·{" "}
-                {getConditionById(condition).label} · {getCompletenessById(completeness).label}
+                {getConditionById(condition, catalogConditions).label} ·{" "}
+                {getCompletenessById(completeness, catalogCompleteness).label}
               </span>
             </div>
           </div>
@@ -546,7 +988,7 @@ export function AnkaufPriceToolV2() {
               </div>
 
               <div className="ak-reveal-card ak-reveal-credit">
-                <span className="ak-reveal-badge">+{Math.round(STORE_CREDIT_BONUS * 100)}% Power-Up</span>
+                <span className="ak-reveal-badge">+{Math.round(storeCreditBonus * 100)}% Power-Up</span>
                 <span className="ak-reveal-kicker">🪙 RetrOase Guthaben</span>
                 <strong>
                   {formatEuro(creditRange[0] * progress)} – {formatEuro(creditRange[1] * progress)}
@@ -569,9 +1011,12 @@ export function AnkaufPriceToolV2() {
           type="button"
           className="ak-cta ak-price-cta"
           onClick={scrollToForm}
-          disabled={!canReveal}
+          disabled={!canReveal || (requireRevealBeforeOffer && reveal !== "done")}
         >
-          <span>{mode === "single" ? "Dieses Produkt anbieten" : "Mit diesem Paket anbieten"}</span>
+          <span>
+            {offerCtaLabel ??
+              (mode === "single" ? "Dieses Produkt anbieten" : "Mit diesem Paket anbieten")}
+          </span>
           <ArrowRight size={18} />
         </button>
       </div>

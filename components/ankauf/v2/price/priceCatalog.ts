@@ -13,6 +13,11 @@ export interface PriceVariant {
   baseRange: PriceRange;
   demand: DemandLevel;
   aliases: string[];
+  brandLogoUrl?: string | null;
+  familyImageUrl?: string | null;
+  imageUrl?: string | null;
+  requiredAccessories?: string[];
+  optionalAccessories?: string[];
 }
 
 export interface PriceCondition {
@@ -27,6 +32,14 @@ export interface PriceCompleteness {
   label: string;
   factor: number;
   hint: string;
+}
+
+export interface PriceCatalogData {
+  variants: PriceVariant[];
+  conditions: PriceCondition[];
+  completeness: PriceCompleteness[];
+  storeCreditBonus: number;
+  source: "supabase" | "fallback";
 }
 
 export const PRICE_CONDITIONS: PriceCondition[] = [
@@ -306,6 +319,16 @@ export const PRICE_VARIANTS: PriceVariant[] = [
   },
 ];
 
+export const FALLBACK_STORE_CREDIT_BONUS = 0.1;
+
+export const FALLBACK_PRICE_CATALOG: PriceCatalogData = {
+  variants: PRICE_VARIANTS,
+  conditions: PRICE_CONDITIONS,
+  completeness: PRICE_COMPLETENESS,
+  storeCreditBonus: FALLBACK_STORE_CREDIT_BONUS,
+  source: "fallback",
+};
+
 const SEARCH_STOP_WORDS = new Set([
   "mit",
   "und",
@@ -338,30 +361,36 @@ function getSearchStems(part: string) {
   return stems;
 }
 
-export function getBrands() {
-  return Array.from(new Set(PRICE_VARIANTS.map((variant) => variant.brand)));
+export function getBrands(variants: PriceVariant[] = PRICE_VARIANTS) {
+  return Array.from(new Set(variants.map((variant) => variant.brand)));
 }
 
-export function getFamilies(brand: string) {
+export function getFamilies(brand: string, variants: PriceVariant[] = PRICE_VARIANTS) {
   return Array.from(
-    new Set(PRICE_VARIANTS.filter((variant) => variant.brand === brand).map((variant) => variant.family)),
+    new Set(variants.filter((variant) => variant.brand === brand).map((variant) => variant.family)),
   );
 }
 
-export function getVariants(brand: string, family: string) {
-  return PRICE_VARIANTS.filter((variant) => variant.brand === brand && variant.family === family);
+export function getVariants(brand: string, family: string, variants: PriceVariant[] = PRICE_VARIANTS) {
+  return variants.filter((variant) => variant.brand === brand && variant.family === family);
 }
 
-export function getVariantById(id: string) {
-  return PRICE_VARIANTS.find((variant) => variant.id === id) ?? null;
+export function getVariantById(id: string, variants: PriceVariant[] = PRICE_VARIANTS) {
+  return variants.find((variant) => variant.id === id) ?? null;
 }
 
-export function getConditionById(id: ConditionId) {
-  return PRICE_CONDITIONS.find((condition) => condition.id === id) ?? PRICE_CONDITIONS[1];
+export function getConditionById(
+  id: ConditionId,
+  conditions: PriceCondition[] = PRICE_CONDITIONS,
+) {
+  return conditions.find((condition) => condition.id === id) ?? conditions[1] ?? PRICE_CONDITIONS[1];
 }
 
-export function getCompletenessById(id: CompletenessId) {
-  return PRICE_COMPLETENESS.find((item) => item.id === id) ?? PRICE_COMPLETENESS[1];
+export function getCompletenessById(
+  id: CompletenessId,
+  completeness: PriceCompleteness[] = PRICE_COMPLETENESS,
+) {
+  return completeness.find((item) => item.id === id) ?? completeness[1] ?? PRICE_COMPLETENESS[1];
 }
 
 export function calculateRange(
@@ -369,28 +398,30 @@ export function calculateRange(
   conditionId: ConditionId,
   completenessId: CompletenessId,
   quantity: number,
+  conditions: PriceCondition[] = PRICE_CONDITIONS,
+  completeness: PriceCompleteness[] = PRICE_COMPLETENESS,
 ): PriceRange {
-  const condition = getConditionById(conditionId);
-  const completeness = getCompletenessById(completenessId);
+  const condition = getConditionById(conditionId, conditions);
+  const completenessItem = getCompletenessById(completenessId, completeness);
   const amount = Math.max(1, Math.min(99, Math.round(quantity || 1)));
-  const factor = condition.factor * completeness.factor;
+  const factor = condition.factor * completenessItem.factor;
   return [
     Math.max(1, Math.round(variant.baseRange[0] * factor * amount)),
     Math.max(2, Math.round(variant.baseRange[1] * factor * amount)),
   ];
 }
 
-export function searchVariants(query: string) {
+export function searchVariants(query: string, variants: PriceVariant[] = PRICE_VARIANTS) {
   const normalized = normalizeSearchText(query.trim());
-  if (!normalized) return PRICE_VARIANTS.slice(0, 8);
+  if (!normalized) return variants.slice(0, 8);
 
   const parts = normalized
     .split(/\s+/)
     .filter((part) => part && !/^\d+$/.test(part) && !SEARCH_STOP_WORDS.has(part));
 
-  if (parts.length === 0) return PRICE_VARIANTS.slice(0, 8);
+  if (parts.length === 0) return variants.slice(0, 8);
 
-  return PRICE_VARIANTS.filter((variant) => {
+  return variants.filter((variant) => {
     const haystack = [
       variant.brand,
       variant.family,
