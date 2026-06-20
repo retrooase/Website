@@ -3606,3 +3606,13 @@
 :root:not(.dark) .ak-stage .ak-funnel-v3-trust span {
   background: rgba(14, 155, 87, 0.08);
 }
+/* Schritt-Nummern-Badges: dunkler Kasten (rgba(0,0,0,.2)) -> warmer Sand */
+:root:not(.dark) .ak-stage .ak-funnel-v3-progress span i {
+  background: #f1e9d7;
+}
+/* Checkout-Screen: dunkler Verlaufs-Schleier -> heller gruener Schimmer */
+:root:not(.dark) .ak-stage .ak-funnel-v3-checkout {
+  background:
+    radial-gradient(ellipse 58% 38% at 50% 0%, rgba(14, 155, 87, 0.08), transparent 72%),
+    linear-gradient(180deg, rgba(244, 238, 222, 0.6), rgba(244, 238, 222, 0));
+}

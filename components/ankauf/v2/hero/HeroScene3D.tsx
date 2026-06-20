@@ -4,6 +4,7 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, RoundedBox, Environment, Lightformer, AdaptiveDpr } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import type { Group, MeshStandardMaterial } from "three";
+import { useTheme } from "@/components/ui/ThemeProvider";
 
 /**
  * Three.js-Hero-Szene: ein schwebendes Retro-Gaming-Diorama in Gold-/Casino-Optik —
@@ -274,11 +275,11 @@ function CoinStack() {
 }
 
 /** Glänzende Plattform mit dezentem Goldring (Casino-Vibe). */
-function Platform() {
+function Platform({ isLight }: { isLight: boolean }) {
   return (
     <group position={[0, -1.75, 0]}>
       <RoundedBox args={[6, 0.25, 3]} radius={0.1} smoothness={2}>
-        <meshStandardMaterial color="#0c0c14" metalness={0.6} roughness={0.32} envMapIntensity={1.2} />
+        <meshStandardMaterial color={isLight ? "#241c14" : "#0c0c14"} metalness={0.6} roughness={0.32} envMapIntensity={1.2} />
       </RoundedBox>
       <mesh position={[0, 0.16, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[2.5, 0.035, 12, 64]} />
@@ -289,7 +290,7 @@ function Platform() {
 }
 
 /** Das gesamte Diorama inkl. weicher Maus-Parallaxe. */
-function Diorama() {
+function Diorama({ isLight }: { isLight: boolean }) {
   const ref = useRef<Group>(null);
   useFrame((state) => {
     const g = ref.current;
@@ -302,7 +303,7 @@ function Diorama() {
 
   return (
     <group ref={ref} scale={0.82} position={[0, 0.1, 0]}>
-      <Platform />
+      <Platform isLight={isLight} />
       <RetroTV />
       <RetroConsole />
       <CoinStack />
@@ -318,6 +319,10 @@ function Diorama() {
 
 export default function HeroScene3D() {
   const wrapRef = useRef<HTMLDivElement>(null);
+  // Theme MUSS ausserhalb des <Canvas> gelesen werden — r3f-Komponenten im
+  // Canvas sehen den React-Context nicht; deshalb als Prop reinreichen.
+  const { theme } = useTheme();
+  const isLight = theme === "light";
   // Render-Loop pausieren, sobald der Hero weggescrollt ist (spart GPU/CPU).
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
 
@@ -342,14 +347,14 @@ export default function HeroScene3D() {
         performance={{ min: 0.5 }}
         style={{ touchAction: "none" }}
       >
-        <ambientLight intensity={0.4} />
+        <ambientLight intensity={isLight ? 0.58 : 0.4} />
         <spotLight position={[0, 8, 6]} angle={0.55} penumbra={1} intensity={160} color="#fff0d0" distance={40} />
         <pointLight position={[6, 2, 5]} intensity={55} color="#ffb74d" />
         <pointLight position={[-6, -1, 4]} intensity={28} color="#22d3a3" />
         <pointLight position={[0, -2, 5]} intensity={18} color="#36e0ff" />
 
         <Float speed={1.2} rotationIntensity={0.2} floatIntensity={0.7}>
-          <Diorama />
+          <Diorama isLight={isLight} />
         </Float>
 
         {/* Reflexionen ohne externe HDRI — aus Lichtflächen gebacken */}
