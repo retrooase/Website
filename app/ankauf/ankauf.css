@@ -3616,3 +3616,135 @@
     radial-gradient(ellipse 58% 38% at 50% 0%, rgba(14, 155, 87, 0.08), transparent 72%),
     linear-gradient(180deg, rgba(244, 238, 222, 0.6), rgba(244, 238, 222, 0));
 }
+
+/* ============================================================
+   AUSBAU #1 — Conversion & Vertrauen (Funnel Schätz-Screen)
+   Token-basiert -> funktioniert in Dark UND Light automatisch.
+   ============================================================ */
+.ak-funnel-v3-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.7rem;
+  margin-top: 1.1rem;
+}
+@media (min-width: 720px) {
+  .ak-funnel-v3-stats { grid-template-columns: repeat(4, 1fr); }
+}
+.ak-funnel-v3-stats div {
+  display: grid;
+  gap: 0.25rem;
+  justify-items: center;
+  text-align: center;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: var(--ak-surface);
+  padding: 1rem 0.7rem;
+}
+.ak-funnel-v3-stats strong {
+  font-family: var(--font-jetbrains), monospace;
+  font-size: clamp(1.3rem, 3.4vw, 1.95rem);
+  font-weight: 800;
+  color: var(--ak-gold);
+  line-height: 1;
+}
+.ak-funnel-v3-stats span {
+  color: var(--ak-text-mute);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.ak-funnel-v3-social { margin-top: 1.5rem; }
+.ak-funnel-v3-social > header {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 0.85rem;
+}
+.ak-funnel-v3-social > header strong {
+  color: var(--ak-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+}
+.ak-funnel-v3-stars {
+  color: var(--ak-gold);
+  letter-spacing: 0.12em;
+  font-size: 0.88rem;
+}
+.ak-funnel-v3-reviews {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.8rem;
+}
+@media (min-width: 720px) {
+  .ak-funnel-v3-reviews { grid-template-columns: repeat(3, 1fr); }
+}
+.ak-funnel-v3-reviews figure {
+  margin: 0;
+  border: 1px solid var(--ak-line);
+  border-radius: 16px;
+  background: var(--ak-surface);
+  padding: 1.05rem;
+}
+.ak-funnel-v3-reviews blockquote {
+  margin: 0.55rem 0 0.85rem;
+  color: var(--ak-text);
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+.ak-funnel-v3-reviews figcaption {
+  color: var(--ak-gold-1);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.ak-funnel-v3-faq {
+  margin-top: 1.5rem;
+  display: grid;
+  gap: 0.55rem;
+}
+.ak-funnel-v3-faq > strong {
+  color: var(--ak-text);
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin-bottom: 0.25rem;
+}
+.ak-funnel-v3-faq details {
+  border: 1px solid var(--ak-line);
+  border-radius: 14px;
+  background: var(--ak-surface);
+  padding: 0 0.95rem;
+  transition: border-color 0.2s ease;
+}
+.ak-funnel-v3-faq details[open] {
+  border-color: var(--ak-line-gold);
+}
+.ak-funnel-v3-faq summary {
+  cursor: pointer;
+  list-style: none;
+  padding: 0.9rem 0;
+  color: var(--ak-text);
+  font-weight: 800;
+  font-size: 0.92rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+}
+.ak-funnel-v3-faq summary::-webkit-details-marker { display: none; }
+.ak-funnel-v3-faq summary::after {
+  content: "+";
+  color: var(--ak-gold);
+  font-size: 1.35rem;
+  font-weight: 700;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.ak-funnel-v3-faq details[open] summary::after { content: "−"; }
+.ak-funnel-v3-faq p {
+  margin: 0 0 0.95rem;
+  color: var(--ak-text-dim);
+  font-size: 0.88rem;
+  line-height: 1.55;
+}

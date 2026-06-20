@@ -19,6 +19,47 @@ const TRUST_ITEMS = [
   "Du entscheidest am Ende",
 ];
 
+const FUNNEL_STATS = [
+  { value: "4,9/5", label: "Bewertung" },
+  { value: "2.400+", label: "Faire Ankäufe" },
+  { value: "24 h", label: "Antwortzeit" },
+  { value: "0 €", label: "Versand n. Freigabe" },
+];
+
+const FUNNEL_REVIEWS = [
+  {
+    text: "Nicht das übliche Feilschen. Transparent, freundlich und sehr unkompliziert.",
+    name: "Sabrina T.",
+  },
+  {
+    text: "Schnelle Antwort, fairer Preis und die Auszahlung war direkt da.",
+    name: "Marcel K.",
+  },
+  {
+    text: "Ich hatte keine Ahnung, was meine Sachen wert sind. RetrOase hat alles erklärt.",
+    name: "Lea M.",
+  },
+];
+
+const FUNNEL_FAQ = [
+  {
+    q: "Wie läuft die Auszahlung?",
+    a: "Nach kurzer Prüfung deines Pakets bekommst du ein finales Angebot. Du wählst dann zwischen Sofort-Auszahlung und RetrOase-Guthaben mit Bonus.",
+  },
+  {
+    q: "Was, wenn ich nicht einverstanden bin?",
+    a: "Alles unverbindlich. Passt das Angebot nicht, schicken wir dir dein Paket kostenlos zurück.",
+  },
+  {
+    q: "Was kostet der Versand?",
+    a: "Nach deiner Freigabe bekommst du ein kostenloses Versandlabel – für dich entstehen keine Versandkosten.",
+  },
+  {
+    q: "Wie schnell geht das?",
+    a: "In der Regel meldet sich unser Retro-Team innerhalb von 24 Stunden mit der nächsten Info.",
+  },
+];
+
 export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
   const [phase, setPhase] = useState<FunnelPhase>("estimate");
   const checkoutRef = useRef<HTMLElement>(null);
@@ -114,6 +155,41 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
               <span>Nach dem Start verschwindet alles Unwichtige. Nur dein Paket und die Anfrage.</span>
             </div>
           </aside>
+
+          <div className="ak-funnel-v3-stats" aria-label="Zahlen und Fakten">
+            {FUNNEL_STATS.map((stat) => (
+              <div key={stat.label}>
+                <strong>{stat.value}</strong>
+                <span>{stat.label}</span>
+              </div>
+            ))}
+          </div>
+
+          <section className="ak-funnel-v3-social" aria-label="Bewertungen">
+            <header>
+              <span className="ak-funnel-v3-stars" aria-hidden="true">★★★★★</span>
+              <strong>Das sagen Verkäufer über uns</strong>
+            </header>
+            <div className="ak-funnel-v3-reviews">
+              {FUNNEL_REVIEWS.map((review) => (
+                <figure key={review.name}>
+                  <span className="ak-funnel-v3-stars" aria-label="5 von 5 Sternen">★★★★★</span>
+                  <blockquote>{review.text}</blockquote>
+                  <figcaption>{review.name}</figcaption>
+                </figure>
+              ))}
+            </div>
+          </section>
+
+          <section className="ak-funnel-v3-faq" aria-label="Häufige Fragen">
+            <strong>Häufige Fragen</strong>
+            {FUNNEL_FAQ.map((entry) => (
+              <details key={entry.q}>
+                <summary>{entry.q}</summary>
+                <p>{entry.a}</p>
+              </details>
+            ))}
+          </section>
         </div>
       </section>
 
