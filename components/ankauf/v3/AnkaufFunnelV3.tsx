@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, Lock, ShieldCheck, Sparkles, Zap } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Lock, Package, ShieldCheck, Sparkles, Truck, Wallet, Zap } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { AnkaufPriceToolV2 } from "@/components/ankauf/v2/price/AnkaufPriceToolV2";
 import type { PriceCatalogData } from "@/components/ankauf/v2/price/priceCatalog";
 import { AnkaufWizardV2 } from "@/components/ankauf/v2/wizard/AnkaufWizardV2";
@@ -58,6 +59,13 @@ const FUNNEL_FAQ = [
     q: "Wie schnell geht das?",
     a: "In der Regel meldet sich unser Retro-Team innerhalb von 24 Stunden mit der nächsten Info.",
   },
+];
+
+const HOW_STEPS: { icon: LucideIcon; title: string; text: string }[] = [
+  { icon: Package, title: "1. Zusammenstellen", text: "Such dein Gerät, Spiel oder deine ganze Sammlung." },
+  { icon: Sparkles, title: "2. Wert sehen", text: "Enthülle sofort deinen fairen Richtwert." },
+  { icon: Truck, title: "3. Kostenlos einsenden", text: "Gratis Versandlabel nach deiner Freigabe." },
+  { icon: Wallet, title: "4. Geld kassieren", text: "Aufs Konto – oder als Guthaben mit Bonus." },
 ];
 
 export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
@@ -119,6 +127,21 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
               </span>
             </div>
           </header>
+
+          <ol className="ak-funnel-v3-how" aria-label="So funktioniert's">
+            {HOW_STEPS.map((step) => {
+              const Icon = step.icon;
+              return (
+                <li key={step.title}>
+                  <span className="ak-funnel-v3-how-icon">
+                    <Icon size={20} />
+                  </span>
+                  <strong>{step.title}</strong>
+                  <span>{step.text}</span>
+                </li>
+              );
+            })}
+          </ol>
 
           <div className="ak-funnel-v3-trust" aria-label="Vorteile">
             {TRUST_ITEMS.map((item) => (
