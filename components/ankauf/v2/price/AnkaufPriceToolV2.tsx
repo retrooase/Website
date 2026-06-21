@@ -120,7 +120,7 @@ function getTypeLabel(type: PriceVariant["type"]) {
     handheld: "Handheld",
     game: "Spiel",
     cards: "Karten",
-    accessory: "Zubehor",
+    accessory: "Zubehör",
     bundle: "Bundle",
   };
   return labels[type];
@@ -563,7 +563,7 @@ export function AnkaufPriceToolV2({
             <span className="ak-config-step-number">01</span>
             <div>
               <span className="ak-price-label">Marke</span>
-              <strong>Waehl dein System</strong>
+              <strong>Wähl dein System</strong>
             </div>
           </div>
           <div className="ak-brand-grid" role="listbox" aria-label="Marke">
@@ -700,7 +700,7 @@ export function AnkaufPriceToolV2({
             </label>
 
             <label>
-              <span className="ak-price-label">Vollstaendigkeit</span>
+              <span className="ak-price-label">Vollständigkeit</span>
               <select
                 value={completeness}
                 onChange={(event) => setCompleteness(event.target.value as CompletenessId)}
@@ -758,7 +758,7 @@ export function AnkaufPriceToolV2({
               </label>
               <button type="button" className="ak-add-item" onClick={addItem} disabled={!selectedVariant}>
                 <Plus size={20} />
-                Produkt hinzufuegen
+                Produkt hinzufügen
               </button>
             </div>
           )}

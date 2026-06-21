@@ -167,7 +167,7 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
           <div className="ak-funnel-v3-tool">
             <AnkaufPriceToolV2
               catalog={priceCatalog}
-              offerCtaLabel="Schatzung passt - Ankauf starten"
+              offerCtaLabel="Schätzung passt – Ankauf starten"
               onOfferStart={startCheckout}
               requireRevealBeforeOffer
             />
