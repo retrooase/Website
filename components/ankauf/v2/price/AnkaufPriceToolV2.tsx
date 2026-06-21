@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, CheckCircle2, ImageIcon, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, ImageIcon, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import {
   FALLBACK_PRICE_CATALOG,
   calculateRange,
@@ -39,6 +39,14 @@ const DEFAULT_COMPLETENESS: CompletenessId = "complete";
 
 // Symbole fuer die rotierenden Slot-Walzen waehrend der Aufdeckung.
 const SLOT_SYMBOLS = ["🎮", "🕹️", "👾", "💎", "🪙", "⭐", "🏆", "💰"];
+
+// Schritte des gefuehrten Wizards (nur Einzel-Modus): Marke -> Reihe -> Modell -> Wert.
+const STEP_DEFS = [
+  { n: 1, label: "Marke" },
+  { n: 2, label: "Reihe" },
+  { n: 3, label: "Modell" },
+  { n: 4, label: "Wert" },
+] as const;
 
 function formatEuro(value: number) {
   return `${Math.round(value).toLocaleString("de-DE")} €`;
@@ -265,6 +273,8 @@ export function AnkaufPriceToolV2({
   const reduced = useReducedMotion();
   const [reveal, setReveal] = useState<"idle" | "rolling" | "done">("idle");
   const [progress, setProgress] = useState(0);
+  // Aktueller Schritt im gefuehrten Wizard (greift nur im Einzel-Modus).
+  const [step, setStep] = useState(1);
 
   const brands = useMemo(() => getBrands(catalogVariants), [catalogVariants]);
   const families = useMemo(() => getFamilies(brand, catalogVariants), [brand, catalogVariants]);
@@ -277,6 +287,10 @@ export function AnkaufPriceToolV2({
     : null;
   const selectedEquipment = useMemo(() => getEquipmentPlan(selectedVariant), [selectedVariant]);
 
+  // Der gefuehrte Schritt-fuer-Schritt-Flow gilt nur fuer den Einzel-Modus.
+  // Der Sammlungs-Modus bleibt das offene Accordion (mehrfaches Hinzufuegen).
+  const guided = mode === "single";
+
   useEffect(() => {
     if (!variantId || catalogVariants.length === 0) return;
     if (getVariantById(variantId, catalogVariants)) return;
@@ -284,6 +298,7 @@ export function AnkaufPriceToolV2({
     setBrand("");
     setFamily("");
     setVariantId("");
+    setStep(1);
   }, [catalogVariants, variantId]);
 
   useEffect(() => {
@@ -352,7 +367,12 @@ export function AnkaufPriceToolV2({
     if (next === mode) return;
     setMode(next);
     setReveal("idle");
+    setStep(1);
     if (next === "single") setQuantity(1);
+  }
+
+  function goToStep(next: number) {
+    setStep(Math.max(1, Math.min(STEP_DEFS.length, next)));
   }
 
   function revealValue() {
@@ -370,19 +390,30 @@ export function AnkaufPriceToolV2({
       if (queryQuantity) setQuantity(queryQuantity);
     }
     setQuery("");
+    // Treffer aus der Suche -> direkt zu Zustand/Wert springen.
+    setStep(4);
   }
 
   function handleBrandChange(nextBrand: string) {
-    if (nextBrand === brand) return;
+    // Auto-Weiter: Klick auf eine Marke fuehrt direkt zum naechsten Schritt.
+    if (nextBrand === brand) {
+      setStep(2);
+      return;
+    }
     setBrand(nextBrand);
     setFamily("");
     setVariantId("");
+    setStep(2);
   }
 
   function handleFamilyChange(nextFamily: string) {
-    if (nextFamily === family) return;
+    if (nextFamily === family) {
+      setStep(3);
+      return;
+    }
     setFamily(nextFamily);
     setVariantId("");
+    setStep(3);
   }
 
   function addItem() {
@@ -483,8 +514,62 @@ export function AnkaufPriceToolV2({
     document.getElementById("angebot")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  // Im gefuehrten Modell-Schritt: grosses Vorschaubild links (gewaehlte oder erste Variante).
+  const heroVariant = selectedVariant ?? variants[0] ?? null;
+  const heroImage = getVariantImage(heroVariant);
+
+  // Ob der "Weiter"-Button im aktuellen Schritt freigeschaltet ist.
+  const canAdvance =
+    step === 1 ? Boolean(brand) : step === 2 ? Boolean(family) : step === 3 ? Boolean(selectedVariant) : true;
+
+  // Modell-Auswahl als eigenes Fragment, damit es im gefuehrten 2-Spalten-Layout
+  // und im offenen Accordion identisch wiederverwendet wird (DRY).
+  const modelOptions = (
+    <div className="ak-model-grid" role="listbox" aria-label="Modell">
+      {variants.map((variant) => {
+        const image = getVariantImage(variant);
+        const equipment = getEquipmentPlan(variant);
+        const active = variant.id === variantId;
+        return (
+          <button
+            key={variant.id}
+            type="button"
+            className={active ? "is-active" : ""}
+            onClick={() => setVariantId(variant.id)}
+            aria-selected={active}
+          >
+            <span className="ak-model-visual">
+              <VisualImage
+                src={image}
+                alt={variant.name}
+                className="ak-model-img"
+                sizes="(max-width: 620px) 42vw, 180px"
+              />
+              {!canRenderImage(image) && <ProductFallback variant={variant} />}
+              {active && (
+                <span className="ak-model-check">
+                  <CheckCircle2 size={16} />
+                </span>
+              )}
+            </span>
+            <span className="ak-model-copy">
+              <small>{getTypeLabel(variant.type)} / {getDemandLabel(variant.demand)}</small>
+              <strong>{variant.name}</strong>
+              <em>{formatEuro(variant.baseRange[0])} - {formatEuro(variant.baseRange[1])}</em>
+            </span>
+            <span className="ak-model-equipment">
+              {[...equipment.required, ...equipment.optional].slice(0, 3).map((entry) => (
+                <i key={entry}>{entry}</i>
+              ))}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+
   return (
-    <div className="ak-price-tool" aria-label="Ankauf Preisrechner">
+    <div className="ak-price-tool" data-guided={guided ? "true" : undefined} aria-label="Ankauf Preisrechner">
       {/* Kopf: Titel + Modus-Wahl */}
       <div className="ak-price-head">
         <span className="ak-chip">
@@ -523,39 +608,71 @@ export function AnkaufPriceToolV2({
         </div>
       </div>
 
+      {/* Gefuehrter Fortschritt (nur Einzel-Modus) */}
+      {guided && (
+        <ol className="ak-wizard-stepper" aria-label="Fortschritt">
+          {STEP_DEFS.map((s) => {
+            const reached =
+              s.n === 1 ||
+              (s.n === 2 && Boolean(brand)) ||
+              (s.n === 3 && Boolean(family)) ||
+              (s.n === 4 && Boolean(selectedVariant));
+            const isActive = step === s.n;
+            const isDone = reached && step > s.n;
+            return (
+              <li key={s.n} className={isActive ? "is-active" : isDone ? "is-done" : ""}>
+                <button
+                  type="button"
+                  disabled={!reached}
+                  onClick={() => goToStep(s.n)}
+                  aria-current={isActive ? "step" : undefined}
+                >
+                  <i>{isDone ? <CheckCircle2 size={15} /> : s.n}</i>
+                  <span>{s.label}</span>
+                </button>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+
       {/* Eingabe: visueller Setup-Builder */}
       <section className="ak-picker-panel" aria-label="Produkt auswählen">
-        <label className="ak-price-label" htmlFor="ak-price-search">
-          {mode === "single" ? "Was möchtest du verkaufen?" : "Produkt suchen"}
-        </label>
-        <div className="ak-search-wrap ak-search-lg">
-          <Search size={20} />
-          <input
-            id="ak-price-search"
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="z.B. PlayStation 5, Game Boy, Pokémon Karten…"
-          />
-        </div>
+        {(!guided || step === 1) && (
+          <>
+            <label className="ak-price-label" htmlFor="ak-price-search">
+              {mode === "single" ? "Was möchtest du verkaufen?" : "Produkt suchen"}
+            </label>
+            <div className="ak-search-wrap ak-search-lg">
+              <Search size={20} />
+              <input
+                id="ak-price-search"
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="z.B. PlayStation 5, Game Boy, Pokémon Karten…"
+              />
+            </div>
 
-        {query && (
-          <div className="ak-search-results">
-            {searchResults.length > 0 ? (
-              searchResults.map((variant) => (
-                <button key={variant.id} type="button" onClick={() => selectVariant(variant)}>
-                  <span>{variant.name}</span>
-                  <small>
-                    {variant.brand} / {variant.family}
-                  </small>
-                </button>
-              ))
-            ) : (
-              <p>Kein direkter Treffer — wähl es unten einfach manuell aus.</p>
+            {query && (
+              <div className="ak-search-results">
+                {searchResults.length > 0 ? (
+                  searchResults.map((variant) => (
+                    <button key={variant.id} type="button" onClick={() => selectVariant(variant)}>
+                      <span>{variant.name}</span>
+                      <small>
+                        {variant.brand} / {variant.family}
+                      </small>
+                    </button>
+                  ))
+                ) : (
+                  <p>Kein direkter Treffer — wähl es unten einfach manuell aus.</p>
+                )}
+              </div>
             )}
-          </div>
+          </>
         )}
 
-        <div className="ak-config-step">
+        <div className="ak-config-step" hidden={guided && step !== 1}>
           <div className="ak-config-step-head">
             <span className="ak-config-step-number">01</span>
             <div>
@@ -594,7 +711,7 @@ export function AnkaufPriceToolV2({
           </div>
         </div>
 
-        <div className="ak-config-step" hidden={!brand}>
+        <div className="ak-config-step" hidden={guided ? step !== 2 : !brand}>
           <div className="ak-config-step-head">
             <span className="ak-config-step-number">02</span>
             <div>
@@ -631,7 +748,7 @@ export function AnkaufPriceToolV2({
           </div>
         </div>
 
-        <div className="ak-config-step" hidden={!family}>
+        <div className="ak-config-step" hidden={guided ? step !== 3 : !family}>
           <div className="ak-config-step-head">
             <span className="ak-config-step-number">03</span>
             <div>
@@ -639,50 +756,63 @@ export function AnkaufPriceToolV2({
               <strong>Such dir die genaue Version aus</strong>
             </div>
           </div>
-          <div className="ak-model-grid" role="listbox" aria-label="Modell">
-            {variants.map((variant) => {
-              const image = getVariantImage(variant);
-              const equipment = getEquipmentPlan(variant);
-              const active = variant.id === variantId;
-              return (
-                <button
-                  key={variant.id}
-                  type="button"
-                  className={active ? "is-active" : ""}
-                  onClick={() => setVariantId(variant.id)}
-                  aria-selected={active}
-                >
-                  <span className="ak-model-visual">
-                    <VisualImage
-                      src={image}
-                      alt={variant.name}
-                      className="ak-model-img"
-                      sizes="(max-width: 620px) 42vw, 180px"
-                    />
-                    {!canRenderImage(image) && <ProductFallback variant={variant} />}
-                    {active && (
-                      <span className="ak-model-check">
-                        <CheckCircle2 size={16} />
-                      </span>
-                    )}
-                  </span>
-                  <span className="ak-model-copy">
-                    <small>{getTypeLabel(variant.type)} / {getDemandLabel(variant.demand)}</small>
-                    <strong>{variant.name}</strong>
-                    <em>{formatEuro(variant.baseRange[0])} - {formatEuro(variant.baseRange[1])}</em>
-                  </span>
-                  <span className="ak-model-equipment">
-                    {[...equipment.required, ...equipment.optional].slice(0, 3).map((entry) => (
-                      <i key={entry}>{entry}</i>
-                    ))}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
+          {guided ? (
+            <div className="ak-modell-split">
+              <figure className="ak-modell-hero">
+                <span className="ak-modell-hero-img">
+                  <VisualImage
+                    src={heroImage}
+                    alt={heroVariant?.name ?? family}
+                    className="ak-model-img"
+                    sizes="(max-width: 640px) 80vw, 320px"
+                  />
+                  {!canRenderImage(heroImage) && <ProductFallback variant={heroVariant} />}
+                </span>
+                <figcaption>{selectedVariant?.name ?? family}</figcaption>
+              </figure>
+              <div className="ak-modell-options">
+                <span className="ak-price-label">Welches Modell hast du?</span>
+                {modelOptions}
+              </div>
+            </div>
+          ) : (
+            modelOptions
+          )}
         </div>
 
-        <div className="ak-config-details" hidden={!selectedVariant}>
+        {guided && step <= 3 && (
+          <div className="ak-wizard-nav">
+            <button
+              type="button"
+              className="ak-wizard-back"
+              onClick={() => goToStep(step - 1)}
+              disabled={step === 1}
+            >
+              <ArrowLeft size={16} />
+              Zurück
+            </button>
+            <button
+              type="button"
+              className="ak-wizard-next"
+              onClick={() => goToStep(step + 1)}
+              disabled={!canAdvance}
+            >
+              Weiter
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {guided && step === 4 && (
+          <div className="ak-wizard-nav ak-wizard-nav-top">
+            <button type="button" className="ak-wizard-back" onClick={() => goToStep(3)}>
+              <ArrowLeft size={16} />
+              Zurück zur Modellwahl
+            </button>
+          </div>
+        )}
+
+        <div className="ak-config-details" hidden={guided ? step !== 4 : !selectedVariant}>
           <div className="ak-config-fields">
             <label>
               <span className="ak-price-label">Zustand</span>
@@ -915,7 +1045,7 @@ export function AnkaufPriceToolV2({
       )}
 
       {/* Einzel-Modus: kompakte Produkt-Zusammenfassung (ohne Preis) */}
-      {mode === "single" && selectedVariant && (
+      {mode === "single" && selectedVariant && (!guided || step === 4) && (
         <section className="ak-paket-panel" aria-label="Dein Produkt">
           <div className="ak-single-summary">
             <span className="ak-mode-emoji" aria-hidden="true">🎮</span>
@@ -931,6 +1061,8 @@ export function AnkaufPriceToolV2({
         </section>
       )}
 
+      {(!guided || step === 4) && (
+        <>
       {/* DER eine Ort fuer den Wert: Enthuellen */}
       <div className="ak-reveal-zone" data-state={reveal}>
         {!canReveal && (
@@ -1017,6 +1149,8 @@ export function AnkaufPriceToolV2({
           <ArrowRight size={18} />
         </button>
       </div>
+        </>
+      )}
     </div>
   );
 }

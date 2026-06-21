@@ -1849,6 +1849,210 @@
   }
 }
 
+/* ---- Gefuehrter Wizard (rebuy-Schema, RetrOase-Stil) ----- */
+/* Fortschritts-Leiste: Marke -> Reihe -> Modell -> Wert */
+.ak-wizard-stepper {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin: 0.2rem 0 1.15rem;
+  padding: 0;
+  list-style: none;
+}
+.ak-wizard-stepper li {
+  flex: 1 1 0;
+  min-width: 0;
+}
+.ak-wizard-stepper button {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  border: 1px solid var(--ak-line);
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--ak-text-mute);
+  padding: 0.5rem 0.72rem;
+  font-weight: 800;
+  font-size: 0.82rem;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+.ak-wizard-stepper button:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+.ak-wizard-stepper button:not(:disabled):hover {
+  border-color: var(--ak-line-gold);
+}
+.ak-wizard-stepper li.is-active button {
+  border-color: var(--ak-gold);
+  color: var(--ak-text);
+  background:
+    radial-gradient(circle at 0% 0%, rgba(255, 201, 60, 0.16), transparent 60%),
+    rgba(255, 201, 60, 0.05);
+}
+.ak-wizard-stepper li.is-done button {
+  color: var(--ak-text);
+}
+.ak-wizard-stepper i {
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  width: 26px;
+  height: 26px;
+  border: 1px solid var(--ak-line-gold);
+  border-radius: 999px;
+  color: var(--ak-gold);
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.72rem;
+  font-weight: 900;
+  font-style: normal;
+}
+.ak-wizard-stepper li.is-active i,
+.ak-wizard-stepper li.is-done i {
+  border-color: transparent;
+  background: var(--ak-gold-grad);
+  color: #241500;
+}
+.ak-wizard-stepper li span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Weiter / Zurueck */
+.ak-wizard-nav {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.7rem;
+  margin-top: 1.1rem;
+}
+.ak-wizard-nav-top {
+  margin-top: 0;
+  margin-bottom: 0.9rem;
+}
+.ak-wizard-nav button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 50px;
+  border-radius: 13px;
+  padding: 0 1.2rem;
+  font-weight: 900;
+  font-size: 0.95rem;
+  transition: transform 0.2s var(--ak-smooth), border-color 0.2s ease, background 0.2s ease,
+    opacity 0.2s ease;
+}
+.ak-wizard-back {
+  border: 1px solid var(--ak-line);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--ak-text-dim);
+}
+.ak-wizard-back:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.ak-wizard-back:not(:disabled):hover {
+  border-color: var(--ak-line-gold);
+  color: var(--ak-text);
+}
+.ak-wizard-next {
+  border: 1px solid transparent;
+  background: var(--ak-gold-grad);
+  color: #241500;
+  box-shadow: var(--ak-glow-gold);
+}
+.ak-wizard-next:disabled {
+  opacity: 0.45;
+  cursor: default;
+  box-shadow: none;
+}
+.ak-wizard-next:not(:disabled):hover {
+  transform: translateY(-2px);
+}
+
+/* Modell-Schritt: grosses Bild links, Optionen rechts (rebuy-Detail) */
+.ak-modell-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: 1rem;
+  align-items: start;
+}
+.ak-modell-hero {
+  display: grid;
+  gap: 0.6rem;
+  margin: 0;
+}
+.ak-modell-hero-img {
+  position: relative;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  aspect-ratio: 1.05;
+  border: 1px solid rgba(255, 201, 60, 0.14);
+  border-radius: 16px;
+  background:
+    radial-gradient(circle at 50% 16%, rgba(255, 201, 60, 0.16), transparent 56%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
+}
+.ak-modell-hero figcaption {
+  color: var(--ak-text);
+  font-size: 0.98rem;
+  font-weight: 900;
+  text-align: center;
+}
+.ak-modell-options {
+  display: grid;
+  gap: 0.7rem;
+}
+[data-guided="true"] .ak-modell-options .ak-model-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Groessere Marken-Kacheln im gefuehrten Flow (zentriert, rebuy-Look) */
+[data-guided="true"] .ak-brand-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.9rem;
+}
+[data-guided="true"] .ak-brand-grid button {
+  grid-template-columns: 1fr;
+  justify-items: center;
+  gap: 0.55rem;
+  min-height: 138px;
+  padding: 1.1rem 0.8rem;
+  text-align: center;
+}
+[data-guided="true"] .ak-brand-grid button > span:last-child {
+  justify-items: center;
+}
+[data-guided="true"] .ak-brand-logo {
+  width: 66px;
+  height: 66px;
+  border-radius: 17px;
+}
+
+@media (max-width: 640px) {
+  .ak-modell-split {
+    grid-template-columns: 1fr;
+  }
+  [data-guided="true"] .ak-brand-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  [data-guided="true"] .ak-brand-grid button {
+    min-height: 116px;
+  }
+  .ak-wizard-stepper li span {
+    display: none;
+  }
+  .ak-wizard-stepper button {
+    justify-content: center;
+  }
+  .ak-wizard-nav button {
+    flex: 1;
+    justify-content: center;
+  }
+}
+
 /* ---- Sektion 5 - Vertrauen & Beweise -------------------- */
 .ak-stat-card,
 .ak-review-shell,
@@ -3384,7 +3588,9 @@
 :root:not(.dark) .ak-stage .ak-wizard-v2-success-actions a,
 :root:not(.dark) .ak-stage .ak-wizard-v2-success-actions button,
 :root:not(.dark) .ak-stage .ak-wizard-v2-copy,
-:root:not(.dark) .ak-stage .ak-wizard-v2-direct {
+:root:not(.dark) .ak-stage .ak-wizard-v2-direct,
+:root:not(.dark) .ak-stage .ak-wizard-stepper button,
+:root:not(.dark) .ak-stage .ak-wizard-back {
   background: #f4eede;
 }
 
@@ -3400,6 +3606,7 @@
 :root:not(.dark) .ak-stage .ak-family-mini,
 :root:not(.dark) .ak-stage .ak-model-visual,
 :root:not(.dark) .ak-stage .ak-loadout-panel,
+:root:not(.dark) .ak-stage .ak-modell-hero-img,
 :root:not(.dark) .ak-stage .ak-wizard-v2-side-total,
 :root:not(.dark) .ak-stage .ak-wizard-v2-icon-btn,
 :root:not(.dark) .ak-stage .ak-wizard-v2-kit-group,
