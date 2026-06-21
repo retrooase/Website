@@ -251,15 +251,12 @@ export function AnkaufPriceToolV2({
     ? catalog.completeness
     : FALLBACK_PRICE_CATALOG.completeness;
   const storeCreditBonus = Math.max(0, Math.min(0.5, catalog.storeCreditBonus));
-  const initialVariant =
-    catalogVariants.find((variant) => variant.id === "nintendo-ds-lite") ??
-    catalogVariants[0] ??
-    FALLBACK_PRICE_CATALOG.variants[0];
-
   const [mode, setMode] = useState<SellMode>("single");
-  const [brand, setBrand] = useState(initialVariant?.brand ?? "Nintendo");
-  const [family, setFamily] = useState(initialVariant?.family ?? "Nintendo DS");
-  const [variantId, setVariantId] = useState(initialVariant?.id ?? "nintendo-ds-lite");
+  // Bewusst KEINE Vorauswahl: der Nutzer klickt sich Schritt fuer Schritt durch
+  // (Marke -> Reihe -> Modell). Leere Strings = noch nichts gewaehlt.
+  const [brand, setBrand] = useState("");
+  const [family, setFamily] = useState("");
+  const [variantId, setVariantId] = useState("");
   const [condition, setCondition] = useState<ConditionId>(DEFAULT_CONDITION);
   const [completeness, setCompleteness] = useState<CompletenessId>(DEFAULT_COMPLETENESS);
   const [quantity, setQuantity] = useState(1);
@@ -281,11 +278,12 @@ export function AnkaufPriceToolV2({
   const selectedEquipment = useMemo(() => getEquipmentPlan(selectedVariant), [selectedVariant]);
 
   useEffect(() => {
-    if (getVariantById(variantId, catalogVariants) || catalogVariants.length === 0) return;
-    const nextVariant = catalogVariants[0];
-    setBrand(nextVariant.brand);
-    setFamily(nextVariant.family);
-    setVariantId(nextVariant.id);
+    if (!variantId || catalogVariants.length === 0) return;
+    if (getVariantById(variantId, catalogVariants)) return;
+    // Gewaehlte Variante existiert nicht mehr -> Auswahl zuruecksetzen (keine Auto-Vorauswahl).
+    setBrand("");
+    setFamily("");
+    setVariantId("");
   }, [catalogVariants, variantId]);
 
   useEffect(() => {
@@ -375,17 +373,16 @@ export function AnkaufPriceToolV2({
   }
 
   function handleBrandChange(nextBrand: string) {
-    const nextFamily = getFamilies(nextBrand, catalogVariants)[0] ?? "";
-    const nextVariant = nextFamily ? getVariants(nextBrand, nextFamily, catalogVariants)[0] : null;
+    if (nextBrand === brand) return;
     setBrand(nextBrand);
-    setFamily(nextFamily);
-    setVariantId(nextVariant?.id ?? "");
+    setFamily("");
+    setVariantId("");
   }
 
   function handleFamilyChange(nextFamily: string) {
-    const nextVariant = getVariants(brand, nextFamily, catalogVariants)[0] ?? null;
+    if (nextFamily === family) return;
     setFamily(nextFamily);
-    setVariantId(nextVariant?.id ?? "");
+    setVariantId("");
   }
 
   function addItem() {
@@ -597,7 +594,7 @@ export function AnkaufPriceToolV2({
           </div>
         </div>
 
-        <div className="ak-config-step">
+        <div className="ak-config-step" hidden={!brand}>
           <div className="ak-config-step-head">
             <span className="ak-config-step-number">02</span>
             <div>
@@ -634,7 +631,7 @@ export function AnkaufPriceToolV2({
           </div>
         </div>
 
-        <div className="ak-config-step">
+        <div className="ak-config-step" hidden={!family}>
           <div className="ak-config-step-head">
             <span className="ak-config-step-number">03</span>
             <div>
@@ -685,7 +682,7 @@ export function AnkaufPriceToolV2({
           </div>
         </div>
 
-        <div className="ak-config-details">
+        <div className="ak-config-details" hidden={!selectedVariant}>
           <div className="ak-config-fields">
             <label>
               <span className="ak-price-label">Zustand</span>

@@ -1393,6 +1393,23 @@
   display: none !important;
 }
 
+/* Accordion: noch nicht freigeschaltete Schritte sicher verstecken,
+   freigeschaltete sanft einblenden (Schritt fuer Schritt durchklicken). */
+.ak-config-step[hidden],
+.ak-config-details[hidden] {
+  display: none !important;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ak-config-step,
+  .ak-config-details {
+    animation: ak-config-reveal 0.42s var(--ak-smooth) both;
+  }
+}
+@keyframes ak-config-reveal {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .ak-configurator {
   display: grid;
   gap: 1.05rem;
