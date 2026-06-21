@@ -3,7 +3,7 @@
 > Lebender Übergabe-Stand für die Ankauf-Seite. **Nach jedem größeren Schritt aktualisieren**,
 > damit ein anderer Agent (z. B. Codex) nahtlos mit dem aktuellen Stand weiterarbeiten kann.
 
-**Letztes Update:** 2026-06-18 — Phase 4: AnkaufWizardV2 mit produktabhaengigen Zubehoer-Checklisten aus Preis-Katalog/Fallback.
+**Letztes Update:** 2026-06-21 — Geführter rebuy-Wizard im Preis-Tool (Schritt-für-Schritt Marke→Reihe→Modell→Wert, Stepper, 2-Spalten-Modell-Schritt).
 
 ---
 
@@ -640,3 +640,26 @@ Reihenfolge in `page.tsx` pflegen, HANDOVER.md aktualisieren.
   - HTML-Smoke: `ak-funnel-v3` und `ak-price-tool` vorhanden, alte Hero-Klasse nicht mehr im ausgelieferten HTML.
 - Hinweis:
   - Headless-Chrome-Smoke konnte in dieser Umgebung nicht voll ausgefuehrt werden: Node-REPL wurde durch Windows-Sandbox blockiert, Projekt hat kein lokales `playwright` Package. Manuell im Browser/Handy testen.
+
+**Gefuehrter rebuy-Wizard (Preis-Tool) 2026-06-21:**
+- User-Auftrag: `/ankauf` vom System her wie rebuy.de bauen — voll gefuehrt ("man wird durchgefuehrt"), foolproof ("jeder 70-Jaehrige checkt es"), grosse Kacheln, Modell-Detailschritt mit Bild links wie rebuy, aber im RetrOase-/VAULT-Stil. Architektur-Entscheidung des Users: **gefuehrter Wizard IN `/ankauf`** (keine eigenen Routen pro Marke, Anker bleiben).
+- Geaenderte Dateien:
+  - `components/ankauf/v2/price/AnkaufPriceToolV2.tsx`
+  - `app/ankauf/ankauf.css`
+  - `HANDOVER.md`
+- Umsetzung (nur **Einzel-Modus**; Sammlungs-Modus bleibt bewusst offenes Accordion fuer Mehrfach-Hinzufuegen):
+  - Neuer State `step` (1–4) + `goToStep()`; `guided = mode === "single"`.
+  - Schritte: **1 Marke → 2 Reihe → 3 Modell → 4 Wert**. Immer nur ein Schritt sichtbar (`hidden`-Attribut je Schritt: `guided ? step !== N : <alte Bedingung>`).
+  - **Stepper** oben (`.ak-wizard-stepper`): klickbar bis zum erreichten Schritt, erledigte Schritte mit Haekchen (`CheckCircle2`).
+  - **Auto-Weiter** bei Klick auf Marke/Reihe (`handleBrandChange`→step2, `handleFamilyChange`→step3); Suchtreffer (`selectVariant`)→step4. Expliziter **Weiter/Zurueck** (`.ak-wizard-nav`), `Weiter` ist gegated via `canAdvance`.
+  - **Modell-Schritt im 2-Spalten-Layout** (`.ak-modell-split`): grosses Produktbild links (`.ak-modell-hero-img`, zeigt gewaehlte oder erste Variante), Optionen rechts. Modell-Grid in `const modelOptions` extrahiert (DRY: wird im Split UND im Accordion-Fallback genutzt).
+  - **Groessere Marken-Kacheln** im Flow via `[data-guided="true"] .ak-brand-grid` (3 Spalten, zentriert, Logo oben).
+  - Reveal + "Ankauf starten"-CTA + Einzel-Zusammenfassung erscheinen erst bei `step === 4`.
+  - Root traegt `data-guided="true"` im Einzel-Modus.
+- Invarianten eingehalten: **keine** API-/DB-/localStorage-Vertragsaenderung; `#preisschaetzer`/`#angebot` unberuehrt; alles unter `.ak-stage`/`ak-*`; Funnel-Props (`offerCtaLabel`/`onOfferStart`/`requireRevealBeforeOffer`) unveraendert. Light-Mode-Overrides fuer Stepper/Back/Modell-Hero ergaenzt.
+- Verifikation:
+  - `npx tsc --noEmit --incremental` erfolgreich (EXIT 0).
+  - `GET http://127.0.0.1:3000/ankauf` -> 200; HTML-Smoke: `data-guided`, `ak-wizard-stepper`, `ak-modell-split`, "Welches Modell" vorhanden.
+- Naechster sinnvoller Schritt (vom User noch offen, NICHT gebaut):
+  - Foto-Upload + Mail/Kontakt als **finalen Wizard-Schritt 5** direkt inline (statt erst im separaten `#angebot`-Screen). User-Wortlaut: "auch die Moeglichkeit fuer die Bilder". Entscheidung B1 (nahtloser Sprung) vs. B2 (Formular inline) noch offen.
+  - Optional: Daten-Umlaute im Fallback-Katalog / Supabase-Admin ("Zubehoer", "Nur Geraet").
