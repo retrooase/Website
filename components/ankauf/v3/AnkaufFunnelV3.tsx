@@ -40,6 +40,18 @@ const FUNNEL_REVIEWS = [
     text: "Ich hatte keine Ahnung, was meine Sachen wert sind. RetrOase hat alles erklärt.",
     name: "Lea M.",
   },
+  {
+    text: "Mein ganzer Dachboden voller SNES-Sachen — fair bewertet und super schnell abgewickelt.",
+    name: "Tobias R.",
+  },
+  {
+    text: "Endlich ein Laden, der Retro wirklich versteht. Top Kommunikation.",
+    name: "Jasmin W.",
+  },
+  {
+    text: "Versandlabel kam sofort, Geld zwei Tage später auf dem Konto. Mega.",
+    name: "Daniel H.",
+  },
 ];
 
 const FUNNEL_FAQ = [
@@ -194,13 +206,18 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
               <strong>Das sagen Verkäufer über uns</strong>
             </header>
             <div className="ak-funnel-v3-reviews">
-              {FUNNEL_REVIEWS.map((review) => (
-                <figure key={review.name}>
-                  <span className="ak-funnel-v3-stars" aria-label="5 von 5 Sternen">★★★★★</span>
-                  <blockquote>{review.text}</blockquote>
-                  <figcaption>{review.name}</figcaption>
-                </figure>
-              ))}
+              <div className="ak-funnel-v3-reviews-track">
+                {[...FUNNEL_REVIEWS, ...FUNNEL_REVIEWS].map((review, index) => (
+                  <figure
+                    key={`${review.name}-${index}`}
+                    aria-hidden={index >= FUNNEL_REVIEWS.length}
+                  >
+                    <span className="ak-funnel-v3-stars" aria-label="5 von 5 Sternen">★★★★★</span>
+                    <blockquote>{review.text}</blockquote>
+                    <figcaption>{review.name}</figcaption>
+                  </figure>
+                ))}
+              </div>
             </div>
           </section>
 

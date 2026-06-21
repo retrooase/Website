@@ -1388,6 +1388,11 @@
   margin-top: 1.2rem;
 }
 
+/* Legacy-Fallback-Picker bleibt verlaesslich versteckt (doppelte Eingaben). */
+.ak-picker-stack-legacy[hidden] {
+  display: none !important;
+}
+
 .ak-configurator {
   display: grid;
   gap: 1.05rem;
@@ -3720,14 +3725,31 @@
   font-size: 0.88rem;
 }
 .ak-funnel-v3-reviews {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 0.8rem;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 6%, #000 94%, transparent);
 }
-@media (min-width: 720px) {
-  .ak-funnel-v3-reviews { grid-template-columns: repeat(3, 1fr); }
+.ak-funnel-v3-reviews-track {
+  display: flex;
+  gap: 0.85rem;
+  width: max-content;
+  padding-block: 0.4rem;
+  animation: ak-funnel-reviews-marquee 42s linear infinite;
+  will-change: transform;
+}
+.ak-funnel-v3-reviews:hover .ak-funnel-v3-reviews-track {
+  animation-play-state: paused;
+}
+@keyframes ak-funnel-reviews-marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ak-funnel-v3-reviews { overflow-x: auto; }
+  .ak-funnel-v3-reviews-track { animation: none; }
 }
 .ak-funnel-v3-reviews figure {
+  flex: 0 0 clamp(250px, 72vw, 320px);
   margin: 0;
   border: 1px solid var(--ak-line);
   border-radius: 16px;
@@ -3794,4 +3816,54 @@
   color: var(--ak-text-dim);
   font-size: 0.88rem;
   line-height: 1.55;
+}
+
+/* ============================================================
+   MAX-Politur — Hover-Lift, Gold-Akzente, Entrance
+   (reduced-motion-safe, token-basiert -> Dark + Light)
+   ============================================================ */
+.ak-funnel-v3-stats div,
+.ak-funnel-v3-how li,
+.ak-funnel-v3-faq details,
+.ak-funnel-v3-reviews figure {
+  transition: transform 0.22s var(--ak-smooth), border-color 0.22s ease, box-shadow 0.22s ease;
+}
+.ak-funnel-v3-stats div {
+  position: relative;
+  overflow: hidden;
+}
+.ak-funnel-v3-stats div::after {
+  content: "";
+  position: absolute;
+  left: 20%;
+  right: 20%;
+  bottom: 0;
+  height: 2px;
+  background: var(--ak-gold-grad);
+  opacity: 0.65;
+}
+.ak-funnel-v3-stats div:hover,
+.ak-funnel-v3-how li:hover {
+  transform: translateY(-3px);
+  border-color: var(--ak-line-gold);
+  box-shadow: 0 14px 38px rgba(255, 170, 30, 0.14);
+}
+.ak-funnel-v3-reviews figure:hover {
+  border-color: var(--ak-line-gold);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .ak-funnel-v3-how li,
+  .ak-funnel-v3-stats div {
+    animation: ak-funnel-rise 0.5s var(--ak-smooth) both;
+  }
+  .ak-funnel-v3-how li:nth-child(2),
+  .ak-funnel-v3-stats div:nth-child(2) { animation-delay: 0.07s; }
+  .ak-funnel-v3-how li:nth-child(3),
+  .ak-funnel-v3-stats div:nth-child(3) { animation-delay: 0.14s; }
+  .ak-funnel-v3-how li:nth-child(4),
+  .ak-funnel-v3-stats div:nth-child(4) { animation-delay: 0.21s; }
+}
+@keyframes ak-funnel-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
 }
