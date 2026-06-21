@@ -1595,12 +1595,15 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  aspect-ratio: 1.22;
+  aspect-ratio: 1.18;
+  padding: 7%;
   border: 1px solid rgba(255, 201, 60, 0.13);
   border-radius: 13px;
+  /* Helle Produkt-Plate (beide Themes): freigestellte Konsolenfotos auf Weiss
+     verschmelzen sauber, statt als weisses Rechteck auf dunklem Grund zu stehen. */
   background:
-    radial-gradient(circle at 50% 18%, rgba(255, 201, 60, 0.14), transparent 52%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.18));
+    radial-gradient(circle at 50% 14%, #ffffff, transparent 62%),
+    linear-gradient(180deg, #f6f3ec, #e8e1d2);
 }
 .ak-product-fallback {
   display: grid;
@@ -1624,6 +1627,15 @@
   font-weight: 900;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+}
+/* Plate ist in beiden Themes hell -> Fallback-Text fix dunkel halten. */
+.ak-model-visual .ak-product-fallback strong,
+.ak-modell-hero-img .ak-product-fallback strong {
+  color: #1c1407;
+}
+.ak-model-visual .ak-product-fallback span,
+.ak-modell-hero-img .ak-product-fallback span {
+  color: #7a6a45;
 }
 .ak-model-check {
   position: absolute;
@@ -1975,8 +1987,8 @@
 /* Modell-Schritt: grosses Bild links, Optionen rechts (rebuy-Detail) */
 .ak-modell-split {
   display: grid;
-  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.12fr);
+  gap: 1.5rem;
   align-items: start;
 }
 .ak-modell-hero {
@@ -1989,12 +2001,13 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  aspect-ratio: 1.05;
+  aspect-ratio: 1;
+  padding: 9%;
   border: 1px solid rgba(255, 201, 60, 0.14);
   border-radius: 16px;
   background:
-    radial-gradient(circle at 50% 16%, rgba(255, 201, 60, 0.16), transparent 56%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
+    radial-gradient(circle at 50% 12%, #ffffff, transparent 64%),
+    linear-gradient(180deg, #f6f3ec, #e6dfcf);
 }
 .ak-modell-hero figcaption {
   color: var(--ak-text);
@@ -2008,6 +2021,19 @@
 }
 [data-guided="true"] .ak-modell-options .ak-model-grid {
   grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+/* Groessere Modell-Kacheln + Bilder im gefuehrten Schritt (rebuy-Look). */
+[data-guided="true"] .ak-modell-options .ak-model-grid button {
+  padding: 1rem;
+  gap: 0.9rem;
+}
+[data-guided="true"] .ak-modell-options .ak-model-visual {
+  aspect-ratio: 1.08;
+  padding: 9%;
+}
+[data-guided="true"] .ak-modell-options .ak-model-copy strong {
+  font-size: 1.02rem;
 }
 
 /* Groessere Marken-Kacheln im gefuehrten Flow (zentriert, rebuy-Look) */

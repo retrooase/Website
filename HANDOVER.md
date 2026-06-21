@@ -3,7 +3,16 @@
 > Lebender Übergabe-Stand für die Ankauf-Seite. **Nach jedem größeren Schritt aktualisieren**,
 > damit ein anderer Agent (z. B. Codex) nahtlos mit dem aktuellen Stand weiterarbeiten kann.
 
-**Letztes Update:** 2026-06-21 — Geführter rebuy-Wizard im Preis-Tool (Schritt-für-Schritt Marke→Reihe→Modell→Wert, Stepper, 2-Spalten-Modell-Schritt).
+**Letztes Update:** 2026-06-21 — Echte Konsolen-Produktfotos (Wikimedia, lokal) + automatischer Bild-Resolver; gefuehrter Modell-Schritt vergroessert.
+
+### Changelog 2026-06-21 — Konsolen-Fotos + groesserer Modell-Schritt
+**Task (User):** „Hier fehlen die Bilder der Konsolen, ich will das Außerdem noch größer haben!"
+- **Bild-Quelle (schluessel-frei):** `scripts/fetch-ankauf-devices.mjs` laedt 18 saubere Konsolenfotos (Wikimedia/Evan-Amos, CC/PD, weisser Hintergrund) nach `public/ankauf/devices/` (~2.7 MB gesamt, ueber absteigende Thumb-Breiten klein gehalten) und schreibt die getypte Map `components/ankauf/v2/price/deviceImages.generated.ts`. Erneut ausfuehrbar: `node scripts/fetch-ankauf-devices.mjs`.
+- **Resolver:** `getDeviceKey()` + `getLocalDeviceImage()` in `AnkaufPriceToolV2.tsx`; in `getVariantImage()` als **Fallback** verdrahtet (Reihenfolge: Supabase `imageUrl` → `familyImageUrl` → lokales Konsolenfoto). D. h. sobald im Admin ein echtes Bild gepflegt ist, gewinnt das automatisch.
+- **Ausnahme:** Xbox Series X = sauberes Logo statt Foto (kein frei lizenziertes MS-Pressefoto auf Commons). Spiele/Karten/Zubehör haben (noch) kein Foto → Platzhalter.
+- **Optik:** `.ak-model-visual` + `.ak-modell-hero-img` jetzt helle „Produkt-Plate" in **beiden** Themes (freigestellte Fotos verschmelzen), Fallback-Text dort fix dunkel. Gefuehrter Modell-Schritt vergroessert (`.ak-modell-split` breiter/mehr gap, groessere Kacheln + Bilder).
+- **Verifiziert:** `tsc --noEmit` EXIT 0, `/ankauf` HTTP 200, Device-Files 200, next/image-Optimizer 200.
+- **Lizenz-Hinweis:** Wikimedia-Fotos sind CC/PD (nominative Nutzung wie rebuy/momox) — fuer finalen Shop spaeter durch eigene Produktfotos ersetzen (Resolver greift dann automatisch).
 
 ---
 
