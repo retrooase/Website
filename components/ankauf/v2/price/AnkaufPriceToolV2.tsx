@@ -108,8 +108,38 @@ function getVariantImage(variant?: PriceVariant | null) {
   return variant?.imageUrl ?? variant?.familyImageUrl ?? null;
 }
 
+// Lokale, mitgelieferte Marken-Logos (SVG, weiss) -> /public/ankauf/logos.
+// Greifen automatisch, wenn im Admin/Supabase noch kein eigenes Logo gepflegt ist.
+const LOGO_BASE = "/ankauf/logos";
+
+function getLocalBrandLogo(brand: string): string | null {
+  const t = normalizeConfigText(brand);
+  if (t.includes("nintendo")) return `${LOGO_BASE}/nintendo.svg`;
+  if (t.includes("sony") || t.includes("playstation")) return `${LOGO_BASE}/playstation.svg`;
+  if (t.includes("microsoft") || t.includes("xbox")) return `${LOGO_BASE}/xbox.svg`;
+  if (t.includes("pokemon")) return `${LOGO_BASE}/pokemon.svg`;
+  if (t.includes("sega")) return `${LOGO_BASE}/sega.svg`;
+  if (t.includes("retro")) return `${LOGO_BASE}/retro.svg`;
+  if (t.includes("zubehor") || t.includes("controller") || t.includes("accessory")) {
+    return `${LOGO_BASE}/accessory.svg`;
+  }
+  return null;
+}
+
+function getLocalFamilyLogo(family: string): string | null {
+  const t = normalizeConfigText(family);
+  if (t.includes("switch")) return `${LOGO_BASE}/switch.svg`;
+  if (t.includes("3ds")) return `${LOGO_BASE}/3ds.svg`;
+  if (t.includes("gamecube")) return `${LOGO_BASE}/gamecube.svg`;
+  if (t.includes("sega")) return `${LOGO_BASE}/sega.svg`;
+  return null;
+}
+
 function getBrandLogo(brand: string, variants: PriceVariant[]) {
-  return variants.find((variant) => variant.brand === brand && variant.brandLogoUrl)?.brandLogoUrl ?? null;
+  return (
+    variants.find((variant) => variant.brand === brand && variant.brandLogoUrl)?.brandLogoUrl ??
+    getLocalBrandLogo(brand)
+  );
 }
 
 function getBrandMark(brand: string) {
@@ -218,6 +248,21 @@ function VisualImage({
 }) {
   if (!src || !canRenderImage(src)) return null;
   const imageSrc = src;
+  // Lokale SVG-Logos direkt als <img> rendern (next/image braucht sonst
+  // dangerouslyAllowSVG; fuer Vektoren ist <img> ohnehin am schnellsten).
+  if (imageSrc.endsWith(".svg")) {
+    return (
+      // eslint-disable-next-line @next/next/no-img-element
+      <img
+        src={imageSrc}
+        alt={alt}
+        className={className}
+        loading="lazy"
+        decoding="async"
+        style={{ width: "60%", height: "60%", objectFit: "contain" }}
+      />
+    );
+  }
   return (
     <Image
       src={imageSrc}
@@ -722,7 +767,8 @@ export function AnkaufPriceToolV2({
           <div className="ak-family-rail" role="listbox" aria-label="Reihe">
             {families.map((item) => {
               const familyVariants = getVariants(brand, item, catalogVariants);
-              const image = getVariantImage(familyVariants[0]);
+              const image =
+                getVariantImage(familyVariants[0]) ?? getLocalFamilyLogo(item) ?? getLocalBrandLogo(brand);
               return (
                 <button
                   key={item}

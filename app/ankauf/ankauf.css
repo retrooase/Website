@@ -1500,10 +1500,11 @@
   display: grid;
   place-items: center;
   overflow: hidden;
-  border: 1px solid rgba(255, 201, 60, 0.16);
+  border: 1px solid rgba(255, 201, 60, 0.28);
+  /* Bewusst in beiden Themes dunkel: traegt die weissen SVG-Logos kontrastreich. */
   background:
-    linear-gradient(145deg, rgba(255, 201, 60, 0.14), rgba(255, 255, 255, 0.035)),
-    rgba(0, 0, 0, 0.18);
+    radial-gradient(circle at 30% 18%, rgba(255, 201, 60, 0.2), transparent 60%),
+    #15110a;
 }
 .ak-brand-logo {
   width: 56px;
@@ -3602,8 +3603,6 @@
 :root:not(.dark) .ak-stage .ak-wizard-v2 input,
 :root:not(.dark) .ak-stage .ak-wizard-v2 select,
 :root:not(.dark) .ak-stage .ak-wizard-v2 textarea,
-:root:not(.dark) .ak-stage .ak-brand-logo,
-:root:not(.dark) .ak-stage .ak-family-mini,
 :root:not(.dark) .ak-stage .ak-model-visual,
 :root:not(.dark) .ak-stage .ak-loadout-panel,
 :root:not(.dark) .ak-stage .ak-modell-hero-img,
