@@ -1684,8 +1684,36 @@
   display: grid;
   gap: 0.45rem;
 }
-.ak-config-fields select {
+/* Native Form-Controls erben die Seitenschrift NICHT -> explizit Inter,
+   damit Felder ueberall mit der Website uebereinstimmen. */
+.ak-stage select,
+.ak-stage input,
+.ak-stage textarea {
+  font-family: var(--font-inter), system-ui, sans-serif;
+}
+/* Konfigurator-Selects (Zustand/Vollstaendigkeit) waren ungestylt
+   (nur width) -> volle, themen-konsistente Formatierung. */
+.ak-config-fields select,
+.ak-picker-panel select {
   width: 100%;
+  min-height: 48px;
+  border: 1px solid var(--ak-line);
+  border-radius: 12px;
+  background: var(--ak-surface-2);
+  color: var(--ak-text);
+  padding: 0 0.9rem;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+.ak-config-fields select:focus,
+.ak-picker-panel select:focus {
+  outline: none;
+  border-color: var(--ak-gold);
+}
+.ak-config-fields option,
+.ak-picker-panel option {
+  background: var(--ak-surface);
+  color: var(--ak-text);
 }
 .ak-loadout-panel {
   border: 1px solid rgba(0, 255, 136, 0.16);
