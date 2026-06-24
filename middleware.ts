@@ -1,7 +1,17 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import { isAdminUser } from "@/lib/is-admin";
+
+// Admin-Check bewusst inline: die Edge-Middleware darf KEINE lib-Module
+// importieren, sonst meldet Vercel "referencing unsupported modules".
+function isAdminEmail(email?: string | null): boolean {
+  if (!email) return false;
+  const raw = process.env.ADMIN_EMAIL || "eren@retroase.de";
+  return raw
+    .split(",")
+    .map((e) => e.trim().toLowerCase())
+    .includes(email.toLowerCase());
+}
 
 export async function middleware(request: NextRequest) {
   const response = NextResponse.next({
@@ -33,7 +43,7 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (!isAdminUser(user.email)) {
+  if (!isAdminEmail(user.email)) {
     return NextResponse.redirect(new URL("/access-denied", request.url));
   }
 
