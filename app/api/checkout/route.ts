@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 import { createAdminSupabaseClient } from "@/lib/supabase/server";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripe();
     const body = await req.json() as { productId?: string; productIds?: string[] };
 
     // Einzel-Kauf (BuyButton) oder Warenkorb

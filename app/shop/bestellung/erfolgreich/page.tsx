@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle } from "lucide-react";
-import { stripe } from "@/lib/stripe";
+import { getStripe } from "@/lib/stripe";
 
 export const metadata: Metadata = {
   title: "Bestellung erfolgreich | RetrOase",
@@ -18,6 +18,7 @@ export default async function ErfolgreichPage({ searchParams }: Props) {
 
   if (session_id) {
     try {
+      const stripe = getStripe();
       const session = await stripe.checkout.sessions.retrieve(session_id, {
         expand: ["line_items"],
       });
