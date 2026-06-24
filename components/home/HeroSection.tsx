@@ -19,7 +19,7 @@ const SHOP_CARDS = [
   {
     logo: "/ankauf/logos/nintendo.svg",
     title: "Game Boy Color",
-    meta: "geprüft",
+    meta: "refurbished",
     price: "79,90 €",
     className: "left-[2%] top-[0%] w-[62%] rotate-[-3deg] sm:w-[60%] lg:left-[0%] lg:top-[2%] lg:w-[58%]",
   },
@@ -33,8 +33,8 @@ const SHOP_CARDS = [
   {
     logo: "/home/hero-controller.svg",
     title: "Deine Konsole?",
-    meta: "ankauf",
-    price: "Wert checken",
+    meta: "verkaufen",
+    price: "Wert prüfen",
     className: "left-[10%] top-[68%] w-[66%] rotate-[1deg] sm:left-[12%] sm:w-[64%] lg:left-[12%] lg:top-[68%] lg:w-[58%]",
   },
 ] as const;
@@ -178,13 +178,13 @@ export function HeroSection() {
           </div>
 
           <p className="mt-4 max-w-xl text-pretty font-sans text-[0.95rem] leading-relaxed text-white/68 sm:text-lg lg:mt-7">
-            Shop geprüfte Retro-Ware oder lass deine Sammlung fair einschätzen.
+            Kaufe geprüfte, teils refurbished Retro-Ware oder verkaufe deine Sammlung fair an RetrOase.
           </p>
 
-          <div className="mt-8 flex w-full max-w-md flex-row gap-4 sm:max-w-none sm:justify-center lg:mt-9 lg:justify-start">
+          <div className="mt-8 flex w-full max-w-md flex-row gap-3 pr-16 sm:max-w-none sm:justify-center sm:gap-4 sm:pr-0 lg:mt-9 lg:justify-start">
             <Link
               href="/ankauf"
-              className="group relative mx-auto inline-flex min-h-[52px] w-full max-w-[16rem] items-center justify-center overflow-hidden rounded-full px-4 py-3.5 font-sans text-sm font-extrabold text-[#271300] transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-accent-gold sm:mx-0 sm:min-h-[60px] sm:w-auto sm:max-w-none sm:px-7 sm:py-4 sm:text-base"
+              className="group relative inline-flex min-h-[52px] flex-1 items-center justify-center overflow-hidden rounded-full px-4 py-3.5 font-sans text-sm font-extrabold text-[#271300] transition-all duration-300 hover:-translate-y-0.5 focus-visible:outline-accent-gold sm:min-h-[60px] sm:flex-none sm:px-7 sm:py-4 sm:text-base"
               style={{
                 background: "linear-gradient(135deg, #FFE9A8 0%, #FFC83D 40%, #FF8B1F 100%)",
                 boxShadow:
@@ -197,17 +197,18 @@ export function HeroSection() {
                 aria-hidden="true"
               />
               <span className="relative inline-flex items-center gap-2">
-                Preis schätzen lassen
+                Ware verkaufen
                 <ArrowRight size={18} className="transition-transform duration-200 group-hover:translate-x-1" />
               </span>
             </Link>
 
             <Link
               href="/shop"
-              className="hidden min-h-[60px] items-center justify-center gap-2 rounded-full border border-white/14 bg-white/[0.045] px-7 py-4 font-sans text-base font-extrabold text-white/78 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-orange/50 hover:bg-accent-orange/10 hover:text-white sm:inline-flex"
+              className="inline-flex min-h-[52px] w-[5.25rem] items-center justify-center gap-2 rounded-full border border-white/14 bg-white/[0.045] px-3 py-3.5 font-sans text-sm font-extrabold text-white/78 backdrop-blur transition-all duration-200 hover:-translate-y-0.5 hover:border-accent-orange/50 hover:bg-accent-orange/10 hover:text-white sm:min-h-[60px] sm:w-auto sm:px-7 sm:py-4 sm:text-base"
             >
-              <span>Zum Shop</span>
-              <ShoppingBag size={18} />
+              <span className="sm:hidden">Shop</span>
+              <span className="hidden sm:inline">Shop entdecken</span>
+              <ShoppingBag size={17} />
             </Link>
           </div>
 
