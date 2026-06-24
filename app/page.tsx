@@ -5,10 +5,7 @@ import { TickerBar } from "@/components/home/TickerBar";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { BasementFomo } from "@/components/home/BasementFomo";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
-import { CategoriesGrid } from "@/components/home/CategoriesGrid";
 import { AnkaufTeaser } from "@/components/home/AnkaufTeaser";
-import { PriceEstimator } from "@/components/home/PriceEstimator";
-import { BlogPreview } from "@/components/home/BlogPreview";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 export const revalidate = 60;
@@ -51,10 +48,7 @@ export default function HomePage() {
       <Suspense fallback={<FeaturedSkeleton />}>
         <FeaturedProducts />
       </Suspense>
-      <CategoriesGrid />
       <AnkaufTeaser />
-      <PriceEstimator />
-      <BlogPreview />
       <NewsletterSignup />
     </>
   );
