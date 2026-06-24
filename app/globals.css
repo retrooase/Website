@@ -406,6 +406,26 @@
   0%, 100% { transform: translateY(0px); }
   50%       { transform: translateY(-10px); }
 }
+@keyframes hero-rain {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -150px, 0) rotate(var(--hero-start));
+  }
+  12% {
+    opacity: var(--hero-opacity);
+  }
+  82% {
+    opacity: var(--hero-opacity);
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(var(--hero-drift), calc(100svh + 170px), 0) rotate(var(--hero-end));
+  }
+}
+@keyframes hero-float {
+  0%, 100% { transform: translateY(0); }
+  50%      { transform: translateY(-12px); }
+}
 @keyframes pulse-ring {
   0%   { transform: scale(1); opacity: 0.6; }
   100% { transform: scale(1.6); opacity: 0; }

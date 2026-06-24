@@ -151,17 +151,19 @@ export function BasementFomo() {
         </h2>
 
         {/* Die große Zahl */}
-        <span
-          ref={numRef}
-          className="block font-display font-extrabold leading-none mb-4 tabular-nums"
-          style={{
-            color: "var(--accent-gold)",
-            fontSize: "clamp(3.2rem, 13vw, 9rem)",
-            textShadow: "0 0 40px rgba(240,164,41,0.45), 0 0 90px rgba(240,164,41,0.2)",
-          }}
-        >
-          {Math.round(value).toLocaleString("de-DE")}
-        </span>
+        <div className="relative left-1/2 mb-4 flex w-screen -translate-x-1/2 justify-center px-3 text-center">
+          <span
+            ref={numRef}
+            className="inline-block max-w-full font-display font-extrabold leading-none tabular-nums"
+            style={{
+              color: "var(--accent-gold)",
+              fontSize: "clamp(2.4rem, 10.4vw, 9rem)",
+              textShadow: "0 0 40px rgba(240,164,41,0.45), 0 0 90px rgba(240,164,41,0.2)",
+            }}
+          >
+            {Math.round(value).toLocaleString("de-DE")}
+          </span>
+        </div>
 
         <p className="font-sans text-sm sm:text-base text-white/45 max-w-md mx-auto mb-2">
           Geräte, die ungenutzt in Schubladen, Kartons und auf Dachböden verstauben.
