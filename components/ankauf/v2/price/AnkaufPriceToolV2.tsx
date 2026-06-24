@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowLeft, ArrowRight, CheckCircle2, ImageIcon, Plus, Search, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, CheckCircle2, Plus, Search, Sparkles, Trash2 } from "lucide-react";
 import {
   FALLBACK_PRICE_CATALOG,
   calculateRange,
@@ -20,6 +20,7 @@ import {
   type PriceRange,
   type PriceVariant,
 } from "./priceCatalog";
+import { ConsoleGlyph } from "./ConsoleGlyph";
 import { DEVICE_IMAGES } from "./deviceImages.generated";
 import { useReducedMotion } from "../lib/hooks";
 import { ConfettiBurst } from "../scroll/ConfettiBurst";
@@ -105,41 +106,41 @@ function canRenderImage(src?: string | null) {
   }
 }
 
-// Reihe/Modell -> lokaler Konsolen-Foto-Schluessel (siehe deviceImages.generated.ts).
-// Reihenfolge: spezifisch vor generisch (z. B. "3ds" vor "ds", "super nintendo" vor "nintendo").
+// Reihe/Modell -> Schluessel des freigestellten Konsolen-Fotos (deviceImages.generated.ts).
+// Variantengenau: Disc/Digital/Slim/Lite werden unterschieden. Reihenfolge: spezifisch vor generisch.
 function getDeviceKey(family: string, name: string): string | null {
   const t = normalizeConfigText(`${family} ${name}`);
-  if (t.includes("playstation 5") || t.includes("ps5")) return "ps5";
-  if (t.includes("playstation 4") || t.includes("ps4")) return "ps4";
-  if (t.includes("playstation 3") || t.includes("ps3")) return "ps3";
-  if (t.includes("playstation 2") || t.includes("ps2")) return "ps2";
-  if (t.includes("psx") || t.includes("psone") || t.includes("ps1") || t.includes("playstation 1")) return "ps1";
-  if (t.includes("playstation")) return "ps5";
-  if (t.includes("switch")) return "switch";
-  if (t.includes("3ds")) return "3ds";
-  if (t.includes("nintendo ds") || t.includes(" ds ") || t.endsWith(" ds")) return "ds";
-  if (t.includes("game boy") || t.includes("gameboy")) return "gameboy";
+  if (t.includes("playstation 5") || t.includes("ps5")) {
+    if (t.includes("slim")) return "ps5-slim";
+    if (t.includes("digital")) return "ps5-digital";
+    return "ps5-disc";
+  }
+  if (t.includes("playstation 4") || t.includes("ps4")) return t.includes("slim") ? "ps4-slim" : "ps4";
+  if (t.includes("playstation 2") || t.includes("ps2")) return "ps2-slim";
+  if (t.includes("switch")) return t.includes("lite") ? "switch-lite" : "switch";
+  if (t.includes("3ds")) return "3ds-xl";
+  if (t.includes("dsi")) return "dsi";
+  if (t.includes("nintendo ds") || t.includes(" ds ") || t.endsWith(" ds")) return "ds-lite";
+  if (t.includes("game boy") || t.includes("gameboy")) return t.includes("sp") ? "gba-sp" : "gameboy-color";
   if (t.includes("nintendo 64") || t.includes("n64")) return "n64";
   if (t.includes("gamecube") || t.includes("game cube")) return "gamecube";
-  if (t.includes("wii")) return "wii";
   if (t.includes("snes") || t.includes("super nintendo") || t.includes("super famicom")) return "snes";
-  if (t.includes("nes") || t.includes("famicom") || t.includes("entertainment system")) return "nes";
-  if (t.includes("xbox series")) return "xbox-series";
-  if (t.includes("xbox one")) return "xbox-one";
-  if (t.includes("xbox 360")) return "xbox-360";
-  if (t.includes("xbox")) return "xbox-series";
   if (t.includes("sega") || t.includes("mega drive") || t.includes("genesis")) return "sega";
+  if (t.includes("xbox series s")) return "xbox-series-s";
+  if (t.includes("xbox")) return "xbox-series-x";
   return null;
 }
 
 function getLocalDeviceImage(variant?: PriceVariant | null): string | null {
   if (!variant) return null;
+  // Nur fuer Geraete (nicht fuer Spiele/Karten/Zubehoer) ein Konsolen-Foto liefern.
+  if (variant.type !== "console" && variant.type !== "handheld") return null;
   const key = getDeviceKey(variant.family ?? "", variant.name ?? "");
   return key ? DEVICE_IMAGES[key] ?? null : null;
 }
 
 function getVariantImage(variant?: PriceVariant | null) {
-  // Supabase-Bilder gewinnen; lokales Konsolenfoto greift nur als Fallback.
+  // Echte Supabase-Bilder gewinnen; sonst das freigestellte Konsolen-Foto.
   return variant?.imageUrl ?? variant?.familyImageUrl ?? getLocalDeviceImage(variant) ?? null;
 }
 
@@ -307,16 +308,6 @@ function VisualImage({
       className={className}
       unoptimized={imageSrc.startsWith("http")}
     />
-  );
-}
-
-function ProductFallback({ variant }: { variant?: PriceVariant | null }) {
-  return (
-    <div className="ak-product-fallback" aria-hidden="true">
-      <ImageIcon size={22} />
-      <strong>{variant ? getBrandMark(variant.name) : "RO"}</strong>
-      <span>{variant ? getTypeLabel(variant.type) : "Produkt"}</span>
-    </div>
   );
 }
 
@@ -619,13 +610,16 @@ export function AnkaufPriceToolV2({
             aria-selected={active}
           >
             <span className="ak-model-visual">
-              <VisualImage
-                src={image}
-                alt={variant.name}
-                className="ak-model-img"
-                sizes="(max-width: 620px) 42vw, 180px"
-              />
-              {!canRenderImage(image) && <ProductFallback variant={variant} />}
+              {canRenderImage(image) ? (
+                <VisualImage
+                  src={image}
+                  alt={variant.name}
+                  className="ak-model-img"
+                  sizes="(max-width: 620px) 42vw, 180px"
+                />
+              ) : (
+                <ConsoleGlyph variant={variant} />
+              )}
               {active && (
                 <span className="ak-model-check">
                   <CheckCircle2 size={16} />
@@ -841,13 +835,16 @@ export function AnkaufPriceToolV2({
             <div className="ak-modell-split">
               <figure className="ak-modell-hero">
                 <span className="ak-modell-hero-img">
-                  <VisualImage
-                    src={heroImage}
-                    alt={heroVariant?.name ?? family}
-                    className="ak-model-img"
-                    sizes="(max-width: 640px) 80vw, 320px"
-                  />
-                  {!canRenderImage(heroImage) && <ProductFallback variant={heroVariant} />}
+                  {canRenderImage(heroImage) ? (
+                    <VisualImage
+                      src={heroImage}
+                      alt={heroVariant?.name ?? family}
+                      className="ak-model-img"
+                      sizes="(max-width: 640px) 80vw, 320px"
+                    />
+                  ) : (
+                    <ConsoleGlyph variant={heroVariant} />
+                  )}
                 </span>
                 <figcaption>{selectedVariant?.name ?? family}</figcaption>
               </figure>

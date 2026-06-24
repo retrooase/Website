@@ -19,7 +19,7 @@ import {
   Upload,
   X,
 } from "lucide-react";
-import { CATEGORIES, SITE } from "@/lib/constants";
+import { CATEGORIES } from "@/lib/constants";
 import type { PriceVariant } from "../price/priceCatalog";
 
 type WizardStep = 0 | 1 | 2 | 3 | 4;

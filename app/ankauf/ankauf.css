@@ -1596,14 +1596,28 @@
   place-items: center;
   overflow: hidden;
   aspect-ratio: 1.18;
-  padding: 7%;
-  border: 1px solid rgba(255, 201, 60, 0.13);
+  padding: 9%;
+  border: 1px solid rgba(255, 201, 60, 0.16);
   border-radius: 13px;
-  /* Helle Produkt-Plate (beide Themes): freigestellte Konsolenfotos auf Weiss
-     verschmelzen sauber, statt als weisses Rechteck auf dunklem Grund zu stehen. */
+  /* Neutrale Graphit-"Showcase"-Plate (beide Themes gleich): traegt sowohl
+     weisse (PS5) als auch schwarze (PS2/Xbox) Konsolen-Fotos kontrastreich. */
   background:
-    radial-gradient(circle at 50% 14%, #ffffff, transparent 62%),
-    linear-gradient(180deg, #f6f3ec, #e8e1d2);
+    radial-gradient(circle at 50% 30%, #6f6c78, transparent 68%),
+    linear-gradient(180deg, #34323d, #201f27);
+}
+/* Freigestelltes Konsolen-Foto: weicher Schatten -> schwebt auf der Plate. */
+.ak-model-img {
+  filter: drop-shadow(0 7px 14px rgba(0, 0, 0, 0.45));
+}
+/* Glyph-Fallback (Spiele/Karten/Zubehoer): Palette passend zur Graphit-Plate. */
+.ak-console-glyph {
+  width: 100%;
+  height: 100%;
+  --gx-body: #57555f;
+  --gx-body-2: #1b1a22;
+  --gx-edge: rgba(255, 255, 255, 0.24);
+  --gx-accent: var(--ak-gold);
+  filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.5));
 }
 .ak-product-fallback {
   display: grid;
@@ -2002,12 +2016,12 @@
   place-items: center;
   overflow: hidden;
   aspect-ratio: 1;
-  padding: 9%;
-  border: 1px solid rgba(255, 201, 60, 0.14);
+  padding: 11%;
+  border: 1px solid rgba(255, 201, 60, 0.16);
   border-radius: 16px;
   background:
-    radial-gradient(circle at 50% 12%, #ffffff, transparent 64%),
-    linear-gradient(180deg, #f6f3ec, #e6dfcf);
+    radial-gradient(circle at 50% 28%, #6f6c78, transparent 70%),
+    linear-gradient(180deg, #34323d, #201f27);
 }
 .ak-modell-hero figcaption {
   color: var(--ak-text);
@@ -3629,9 +3643,7 @@
 :root:not(.dark) .ak-stage .ak-wizard-v2 input,
 :root:not(.dark) .ak-stage .ak-wizard-v2 select,
 :root:not(.dark) .ak-stage .ak-wizard-v2 textarea,
-:root:not(.dark) .ak-stage .ak-model-visual,
 :root:not(.dark) .ak-stage .ak-loadout-panel,
-:root:not(.dark) .ak-stage .ak-modell-hero-img,
 :root:not(.dark) .ak-stage .ak-wizard-v2-side-total,
 :root:not(.dark) .ak-stage .ak-wizard-v2-icon-btn,
 :root:not(.dark) .ak-stage .ak-wizard-v2-kit-group,
