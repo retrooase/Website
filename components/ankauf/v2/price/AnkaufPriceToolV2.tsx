@@ -21,7 +21,6 @@ import {
   type PriceVariant,
 } from "./priceCatalog";
 import { ConsoleGlyph } from "./ConsoleGlyph";
-import { DEVICE_IMAGES } from "./deviceImages.generated";
 import { useReducedMotion } from "../lib/hooks";
 import { ConfettiBurst } from "../scroll/ConfettiBurst";
 
@@ -106,42 +105,10 @@ function canRenderImage(src?: string | null) {
   }
 }
 
-// Reihe/Modell -> Schluessel des freigestellten Konsolen-Fotos (deviceImages.generated.ts).
-// Variantengenau: Disc/Digital/Slim/Lite werden unterschieden. Reihenfolge: spezifisch vor generisch.
-function getDeviceKey(family: string, name: string): string | null {
-  const t = normalizeConfigText(`${family} ${name}`);
-  if (t.includes("playstation 5") || t.includes("ps5")) {
-    if (t.includes("slim")) return "ps5-slim";
-    if (t.includes("digital")) return "ps5-digital";
-    return "ps5-disc";
-  }
-  if (t.includes("playstation 4") || t.includes("ps4")) return t.includes("slim") ? "ps4-slim" : "ps4";
-  if (t.includes("playstation 2") || t.includes("ps2")) return "ps2-slim";
-  if (t.includes("switch")) return t.includes("lite") ? "switch-lite" : "switch";
-  if (t.includes("3ds")) return "3ds-xl";
-  if (t.includes("dsi")) return "dsi";
-  if (t.includes("nintendo ds") || t.includes(" ds ") || t.endsWith(" ds")) return "ds-lite";
-  if (t.includes("game boy") || t.includes("gameboy")) return t.includes("sp") ? "gba-sp" : "gameboy-color";
-  if (t.includes("nintendo 64") || t.includes("n64")) return "n64";
-  if (t.includes("gamecube") || t.includes("game cube")) return "gamecube";
-  if (t.includes("snes") || t.includes("super nintendo") || t.includes("super famicom")) return "snes";
-  if (t.includes("sega") || t.includes("mega drive") || t.includes("genesis")) return "sega";
-  if (t.includes("xbox series s")) return "xbox-series-s";
-  if (t.includes("xbox")) return "xbox-series-x";
-  return null;
-}
-
-function getLocalDeviceImage(variant?: PriceVariant | null): string | null {
-  if (!variant) return null;
-  // Nur fuer Geraete (nicht fuer Spiele/Karten/Zubehoer) ein Konsolen-Foto liefern.
-  if (variant.type !== "console" && variant.type !== "handheld") return null;
-  const key = getDeviceKey(variant.family ?? "", variant.name ?? "");
-  return key ? DEVICE_IMAGES[key] ?? null : null;
-}
-
 function getVariantImage(variant?: PriceVariant | null) {
-  // Echte Supabase-Bilder gewinnen; sonst das freigestellte Konsolen-Foto.
-  return variant?.imageUrl ?? variant?.familyImageUrl ?? getLocalDeviceImage(variant) ?? null;
+  // Nur echte Supabase-Produktbilder. Konsolen-Fotos wurden entfernt; fehlt ein
+  // Bild, greift der gezeichnete Platzhalter (ConsoleGlyph).
+  return variant?.imageUrl ?? variant?.familyImageUrl ?? null;
 }
 
 // Lokale, mitgelieferte Marken-Logos (SVG, weiss) -> /public/ankauf/logos.
