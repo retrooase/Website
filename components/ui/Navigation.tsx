@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { SITE, NAV_LINKS } from "@/lib/constants";
 import { clsx } from "clsx";
-import { ThemeToggle } from "./ThemeToggle";
 import { useWishlistHybrid } from "@/lib/hooks/useWishlistHybrid";
 import { useCart } from "@/lib/hooks/useCart";
 
@@ -170,8 +169,6 @@ export function Navigation({ isAdmin = false }: { isAdmin?: boolean }) {
 
             {/* Desktop Actions */}
             <div className="hidden lg:flex items-center gap-1">
-              <ThemeToggle />
-
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"
@@ -240,8 +237,6 @@ export function Navigation({ isAdmin = false }: { isAdmin?: boolean }) {
 
             {/* Mobile Header Actions */}
             <div className="flex lg:hidden items-center gap-1">
-              <ThemeToggle />
-
               <button
                 onClick={() => setIsSearchOpen(!isSearchOpen)}
                 className="p-2.5 rounded-full text-text-secondary hover:text-text-primary hover:bg-surface-hover transition-all duration-200 min-h-[44px] min-w-[44px] flex items-center justify-center"

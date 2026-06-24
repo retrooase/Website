@@ -3,6 +3,7 @@ import { Suspense } from "react";
 import { HeroSection } from "@/components/home/HeroSection";
 import { TickerBar } from "@/components/home/TickerBar";
 import { TrustBadges } from "@/components/home/TrustBadges";
+import { BasementFomo } from "@/components/home/BasementFomo";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { CategoriesGrid } from "@/components/home/CategoriesGrid";
 import { AnkaufTeaser } from "@/components/home/AnkaufTeaser";
@@ -46,6 +47,7 @@ export default function HomePage() {
       <HeroSection />
       <TickerBar />
       <TrustBadges />
+      <BasementFomo />
       <Suspense fallback={<FeaturedSkeleton />}>
         <FeaturedProducts />
       </Suspense>

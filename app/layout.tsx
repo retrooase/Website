@@ -10,7 +10,6 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { CookieBanner } from "@/components/ui/CookieBanner";
 import { ScrollFadeObserver } from "@/components/ui/ScrollFadeObserver";
-import { ThemeProvider } from "@/components/ui/ThemeProvider";
 import { Suspense } from "react";
 
 const syne = Syne({
@@ -92,7 +91,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#050505",
+  themeColor: "#0D0B12",
 };
 
 async function NavWithAuth() {
@@ -131,25 +130,17 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-text-primary font-sans antialiased">
-        {/* Theme-FOUC-Prävention: Dark-Klasse vor React-Hydration setzen */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `try{var t=localStorage.getItem('theme');if(t==='light')document.documentElement.classList.remove('dark');else document.documentElement.classList.add('dark')}catch(e){}`,
-          }}
-        />
-        <ThemeProvider>
-          <ToastProvider>
-            <Suspense fallback={<Navigation isAdmin={false} />}>
-              <NavWithAuth />
-            </Suspense>
-            <main>{children}</main>
-            <Footer />
-            <WhatsAppButton />
-            <BackToTop />
-            <CookieBanner />
-            <ScrollFadeObserver />
-          </ToastProvider>
-        </ThemeProvider>
+        <ToastProvider>
+          <Suspense fallback={<Navigation isAdmin={false} />}>
+            <NavWithAuth />
+          </Suspense>
+          <main>{children}</main>
+          <Footer />
+          <WhatsAppButton />
+          <BackToTop />
+          <CookieBanner />
+          <ScrollFadeObserver />
+        </ToastProvider>
       </body>
     </html>
   );

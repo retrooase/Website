@@ -4,7 +4,6 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Float, RoundedBox, Environment, Lightformer, AdaptiveDpr } from "@react-three/drei";
 import { useEffect, useRef, useState } from "react";
 import type { Group, MeshStandardMaterial } from "three";
-import { useTheme } from "@/components/ui/ThemeProvider";
 
 /**
  * Three.js-Hero-Szene: ein schwebendes Retro-Gaming-Diorama in Gold-/Casino-Optik —
@@ -319,10 +318,8 @@ function Diorama({ isLight }: { isLight: boolean }) {
 
 export default function HeroScene3D() {
   const wrapRef = useRef<HTMLDivElement>(null);
-  // Theme MUSS ausserhalb des <Canvas> gelesen werden — r3f-Komponenten im
-  // Canvas sehen den React-Context nicht; deshalb als Prop reinreichen.
-  const { theme } = useTheme();
-  const isLight = theme === "light";
+  // Single-Theme (Dark) — keine Theme-Umschaltung mehr.
+  const isLight = false;
   // Render-Loop pausieren, sobald der Hero weggescrollt ist (spart GPU/CPU).
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
 
