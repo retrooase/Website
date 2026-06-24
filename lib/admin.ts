@@ -1,12 +1,10 @@
-import { SITE } from "@/lib/constants";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
+import { isAdminUser } from "@/lib/is-admin";
 
-export function isAdminUser(email?: string | null): boolean {
-  if (!email) return false;
-  const raw = process.env.ADMIN_EMAIL || SITE.adminEmail;
-  const admins = raw.split(",").map((e) => e.trim().toLowerCase());
-  return admins.includes(email.toLowerCase());
-}
+// Edge-taugliche, reine Pruefung liegt in lib/is-admin.ts. Hier importiert
+// (assertAdmin nutzt sie) und wieder exportiert, damit bestehende Importe aus
+// "@/lib/admin" weiter laufen.
+export { isAdminUser };
 
 export async function assertAdmin(): Promise<void> {
   const supabase = await createServerSupabaseClient();
