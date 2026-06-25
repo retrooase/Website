@@ -9,7 +9,11 @@ import Image from "next/image";
  * über den kompletten Screen.
  *
  *   • pointer-events-none  → blockiert niemals Klicks/Buttons
- *   • z-30                 → über dem Inhalt, aber UNTER der Navigation (z-50)
+ *   • -z-10                → HINTER dem gesamten Seiteninhalt (Karten/Texte
+ *                            verdecken den Regen); liegt über dem dunklen
+ *                            Body-Backstop. Sektionen sind transparent, damit
+ *                            der Regen durchscheint.
+ *   • Items deckend        → wirken wie echte fliegende Objekte, nicht milchig
  *   • aria-hidden          → reine Deko, kein Screenreader-Rauschen
  *   • Wiederverwendet die `hero-rain` Keyframe aus globals.css
  *   • Bei `prefers-reduced-motion` per `.screen-rain`-Regel komplett aus
@@ -86,14 +90,16 @@ function rainStyle(item: RainItem): CSSProperties {
     ["--hero-drift" as string]: item.drift,
     ["--hero-start" as string]: item.start,
     ["--hero-end" as string]: item.end,
-    ["--hero-opacity" as string]: item.opacity,
+    // Deckend: Items liegen jetzt HINTER dem Inhalt → volle Sichtbarkeit.
+    // (item.opacity bleibt als Feld erhalten, wird hier bewusst übersteuert.)
+    ["--hero-opacity" as string]: "0.95",
   };
 }
 
 export function ScreenRain() {
   return (
     <div
-      className="screen-rain pointer-events-none fixed inset-0 z-30 overflow-hidden"
+      className="screen-rain pointer-events-none fixed inset-0 -z-10 overflow-hidden"
       aria-hidden="true"
     >
       {RAIN_ITEMS.map((item, index) => (

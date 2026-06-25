@@ -29,7 +29,7 @@ export function AnkaufTeaser() {
   return (
     <section
       className="py-20 sm:py-28 scroll-fade relative overflow-hidden"
-      style={{ background: "var(--bg-anchor)" }}
+      style={{ background: "transparent" }}
       aria-labelledby="ankauf-heading"
     >
       {/* Background atmosphere */}

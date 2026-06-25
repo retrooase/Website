@@ -39,7 +39,7 @@ export function NewsletterSignup() {
   return (
     <section
       className="relative py-24 sm:py-36 scroll-fade overflow-hidden"
-      style={{ background: "var(--bg-anchor)" }}
+      style={{ background: "transparent" }}
       aria-labelledby="newsletter-heading"
     >
       {/* Glow */}

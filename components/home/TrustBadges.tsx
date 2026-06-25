@@ -10,7 +10,7 @@ const STATS = [
 
 export function TrustBadges() {
   return (
-    <div className="bg-surface border-y border-border/60 overflow-hidden">
+    <div className="border-y border-border/60 overflow-hidden">
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex overflow-x-auto sm:grid sm:grid-cols-5 divide-x divide-border/60 scrollbar-hide">
           {STATS.map(({ value, label, sub, Icon }) => (

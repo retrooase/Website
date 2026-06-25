@@ -7,7 +7,7 @@ export async function FeaturedProducts() {
   const products = await getFeaturedProducts(4);
 
   return (
-    <section className="relative overflow-hidden py-20 sm:py-28 scroll-fade bg-[#050407]">
+    <section className="relative overflow-hidden py-20 sm:py-28 scroll-fade">
       <div
         className="pointer-events-none absolute inset-0 opacity-70"
         style={{

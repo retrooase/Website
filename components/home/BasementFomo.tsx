@@ -104,7 +104,7 @@ export function BasementFomo() {
       ref={rootRef}
       aria-labelledby="basement-heading"
       className="relative overflow-hidden"
-      style={{ background: "var(--bg-anchor)" }}
+      style={{ background: "transparent" }}
     >
       {/* Hintergrund-Atmosphäre */}
       <div

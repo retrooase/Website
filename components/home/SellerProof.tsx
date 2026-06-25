@@ -39,7 +39,7 @@ export function SellerProof() {
     <section
       aria-labelledby="seller-proof-heading"
       className="scroll-fade relative overflow-hidden py-16 sm:py-24"
-      style={{ background: "var(--bg-anchor)" }}
+      style={{ background: "transparent" }}
     >
       <div
         className="pointer-events-none absolute inset-0 opacity-55"

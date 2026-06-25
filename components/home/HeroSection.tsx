@@ -91,7 +91,7 @@ export function HeroSection() {
       style={{
         minHeight: "calc(100svh - 4rem)",
         background:
-          "radial-gradient(ellipse 70% 54% at 22% 18%, rgba(255,95,46,0.18), transparent 62%), radial-gradient(ellipse 54% 42% at 78% 52%, rgba(34,211,163,0.10), transparent 66%), linear-gradient(180deg, #050407 0%, #0d0a12 54%, #050407 100%)",
+          "radial-gradient(ellipse 70% 54% at 22% 18%, rgba(255,95,46,0.18), transparent 62%), radial-gradient(ellipse 54% 42% at 78% 52%, rgba(34,211,163,0.10), transparent 66%)",
       }}
       aria-labelledby="hero-heading"
     >
