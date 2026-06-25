@@ -9,10 +9,11 @@ import Image from "next/image";
  * über den kompletten Screen.
  *
  *   • pointer-events-none  → blockiert niemals Klicks/Buttons
- *   • -z-10                → HINTER dem gesamten Seiteninhalt (Karten/Texte
- *                            verdecken den Regen); liegt über dem dunklen
- *                            Body-Backstop. Sektionen sind transparent, damit
- *                            der Regen durchscheint.
+ *   • z-0                  → liegt ÜBER dem dunklen Body-Backstop (#050505),
+ *                            aber UNTER dem Seiteninhalt: der Inhalt steckt in
+ *                            einem `relative z-10`-Wrapper (siehe app/page.tsx).
+ *                            Karten/Texte verdecken den Regen; die Sektionen
+ *                            sind transparent, damit er durchscheint.
  *   • Items deckend        → wirken wie echte fliegende Objekte, nicht milchig
  *   • aria-hidden          → reine Deko, kein Screenreader-Rauschen
  *   • Wiederverwendet die `hero-rain` Keyframe aus globals.css
@@ -99,7 +100,7 @@ function rainStyle(item: RainItem): CSSProperties {
 export function ScreenRain() {
   return (
     <div
-      className="screen-rain pointer-events-none fixed inset-0 -z-10 overflow-hidden"
+      className="screen-rain pointer-events-none fixed inset-0 z-0 overflow-hidden"
       aria-hidden="true"
     >
       {RAIN_ITEMS.map((item, index) => (
@@ -113,6 +114,10 @@ export function ScreenRain() {
             alt=""
             width={item.size}
             height={item.size}
+            // Eager laden: die Items sitzen fixed/außerhalb des Viewports und
+            // bewegen sich nur per transform — Lazy-IntersectionObserver würde
+            // nie feuern, die SVGs blieben unsichtbar.
+            loading="eager"
             className={GLOW[item.glow]}
           />
         </span>

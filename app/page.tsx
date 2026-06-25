@@ -44,16 +44,18 @@ export default function HomePage() {
   return (
     <>
       <ScreenRain />
-      <HeroSection />
-      <TickerBar />
-      <TrustBadges />
-      <BasementFomo />
-      <Suspense fallback={<FeaturedSkeleton />}>
-        <FeaturedProducts />
-      </Suspense>
-      <AnkaufTeaser />
-      <SellerProof />
-      <NewsletterSignup />
+      <div className="relative z-10">
+        <HeroSection />
+        <TickerBar />
+        <TrustBadges />
+        <BasementFomo />
+        <Suspense fallback={<FeaturedSkeleton />}>
+          <FeaturedProducts />
+        </Suspense>
+        <AnkaufTeaser />
+        <SellerProof />
+        <NewsletterSignup />
+      </div>
     </>
   );
 }
