@@ -14,7 +14,7 @@ import Image from "next/image";
  *                            einem `relative z-10`-Wrapper (siehe app/page.tsx).
  *                            Karten/Texte verdecken den Regen; die Sektionen
  *                            sind transparent, damit er durchscheint.
- *   • Items deckend        → wirken wie echte fliegende Objekte, nicht milchig
+ *   • Items dezent/milchig → nur leichte Atmosphäre, bewusst zurückhaltend
  *   • aria-hidden          → reine Deko, kein Screenreader-Rauschen
  *   • Wiederverwendet die `hero-rain` Keyframe aus globals.css
  *   • Bei `prefers-reduced-motion` per `.screen-rain`-Regel komplett aus
@@ -91,9 +91,9 @@ function rainStyle(item: RainItem): CSSProperties {
     ["--hero-drift" as string]: item.drift,
     ["--hero-start" as string]: item.start,
     ["--hero-end" as string]: item.end,
-    // Deckend: Items liegen jetzt HINTER dem Inhalt → volle Sichtbarkeit.
-    // (item.opacity bleibt als Feld erhalten, wird hier bewusst übersteuert.)
-    ["--hero-opacity" as string]: "0.95",
+    // Dezent & milchig: nur leichte Atmosphäre im Hintergrund, nicht
+    // aufdringlich. (item.opacity bleibt als Feld, wird hier übersteuert.)
+    ["--hero-opacity" as string]: "0.15",
   };
 }
 
