@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { HeroSection } from "@/components/home/HeroSection";
+import { ScreenRain } from "@/components/home/ScreenRain";
 import { TickerBar } from "@/components/home/TickerBar";
 import { TrustBadges } from "@/components/home/TrustBadges";
 import { BasementFomo } from "@/components/home/BasementFomo";
@@ -42,6 +43,7 @@ function FeaturedSkeleton() {
 export default function HomePage() {
   return (
     <>
+      <ScreenRain />
       <HeroSection />
       <TickerBar />
       <TrustBadges />

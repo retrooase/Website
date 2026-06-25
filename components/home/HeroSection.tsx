@@ -1,19 +1,8 @@
 "use client";
 
-import type { CSSProperties } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, BadgeCheck, Gamepad2, ShoppingBag, Sparkles } from "lucide-react";
-
-const FALLING_ITEMS = [
-  { src: "/home/hero-gameboy.svg", size: 58, left: "7%", delay: "-7s", duration: "17s", drift: "46px", start: "-10deg", end: "28deg", opacity: "0.42" },
-  { src: "/home/hero-controller.svg", size: 72, left: "18%", delay: "-1s", duration: "20s", drift: "-34px", start: "14deg", end: "-32deg", opacity: "0.34" },
-  { src: "/home/hero-coin.svg", size: 34, left: "29%", delay: "-10s", duration: "13s", drift: "18px", start: "0deg", end: "270deg", opacity: "0.5" },
-  { src: "/home/hero-cartridge.svg", size: 56, left: "43%", delay: "-4s", duration: "19s", drift: "-52px", start: "-18deg", end: "24deg", opacity: "0.32" },
-  { src: "/home/hero-coin.svg", size: 28, left: "58%", delay: "-12s", duration: "12s", drift: "26px", start: "0deg", end: "240deg", opacity: "0.46" },
-  { src: "/home/hero-gameboy.svg", size: 48, left: "72%", delay: "-6s", duration: "18s", drift: "-40px", start: "9deg", end: "-24deg", opacity: "0.34" },
-  { src: "/home/hero-controller.svg", size: 64, left: "87%", delay: "-14s", duration: "21s", drift: "30px", start: "-12deg", end: "36deg", opacity: "0.3" },
-] as const;
 
 const SHOP_CARDS = [
   {
@@ -38,36 +27,6 @@ const SHOP_CARDS = [
     className: "left-[10%] top-[68%] w-[66%] rotate-[1deg] sm:left-[12%] sm:w-[64%] lg:left-[12%] lg:top-[68%] lg:w-[58%]",
   },
 ] as const;
-
-function rainStyle(item: (typeof FALLING_ITEMS)[number]): CSSProperties {
-  return {
-    left: item.left,
-    width: item.size,
-    height: item.size,
-    animationDuration: item.duration,
-    animationDelay: item.delay,
-    ["--hero-drift" as string]: item.drift,
-    ["--hero-start" as string]: item.start,
-    ["--hero-end" as string]: item.end,
-    ["--hero-opacity" as string]: item.opacity,
-  };
-}
-
-function HeroRain() {
-  return (
-    <div className="pointer-events-none absolute inset-0 overflow-hidden" aria-hidden="true">
-      {FALLING_ITEMS.map((item, index) => (
-        <span
-          key={`${item.src}-${index}`}
-          className="absolute -top-24 block animate-[hero-rain_linear_infinite] will-change-transform"
-          style={rainStyle(item)}
-        >
-          <Image src={item.src} alt="" width={item.size} height={item.size} className="drop-shadow-[0_0_22px_rgba(255,95,46,0.28)]" />
-        </span>
-      ))}
-    </div>
-  );
-}
 
 function HeroShowcase() {
   return (
@@ -136,8 +95,6 @@ export function HeroSection() {
       }}
       aria-labelledby="hero-heading"
     >
-      <HeroRain />
-
       <div
         className="pointer-events-none absolute inset-0 opacity-60"
         style={{
