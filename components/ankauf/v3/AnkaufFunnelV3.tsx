@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { ArrowLeft, CheckCircle2, Lock, Package, ShieldCheck, Sparkles, Truck, Wallet, Zap } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Package, ShieldCheck, Sparkles, Truck, Wallet } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { AnkaufPriceToolV2 } from "@/components/ankauf/v2/price/AnkaufPriceToolV2";
 import type { PriceCatalogData } from "@/components/ankauf/v2/price/priceCatalog";
@@ -16,68 +16,32 @@ type AnkaufFunnelV3Props = {
 const TRUST_ITEMS = [
   "Kostenlos & unverbindlich",
   "Antwort in 24 h",
-  "Versandlabel nach Freigabe",
   "Du entscheidest am Ende",
 ];
 
-const FUNNEL_STATS = [
-  { value: "4,9/5", label: "Bewertung" },
-  { value: "2.400+", label: "Faire Ankäufe" },
-  { value: "24 h", label: "Antwortzeit" },
-  { value: "0 €", label: "Versand n. Freigabe" },
-];
-
-const FUNNEL_REVIEWS = [
-  {
-    text: "Nicht das übliche Feilschen. Transparent, freundlich und sehr unkompliziert.",
-    name: "Sabrina T.",
-  },
-  {
-    text: "Schnelle Antwort, fairer Preis und die Auszahlung war direkt da.",
-    name: "Marcel K.",
-  },
-  {
-    text: "Ich hatte keine Ahnung, was meine Sachen wert sind. RetrOase hat alles erklärt.",
-    name: "Lea M.",
-  },
-  {
-    text: "Mein ganzer Dachboden voller SNES-Sachen — fair bewertet und super schnell abgewickelt.",
-    name: "Tobias R.",
-  },
-  {
-    text: "Endlich ein Laden, der Retro wirklich versteht. Top Kommunikation.",
-    name: "Jasmin W.",
-  },
-  {
-    text: "Versandlabel kam sofort, Geld zwei Tage später auf dem Konto. Mega.",
-    name: "Daniel H.",
-  },
-];
-
-const FUNNEL_FAQ = [
-  {
-    q: "Wie läuft die Auszahlung?",
-    a: "Nach kurzer Prüfung deines Pakets bekommst du ein finales Angebot. Du wählst dann zwischen Sofort-Auszahlung und RetrOase-Guthaben mit Bonus.",
-  },
-  {
-    q: "Was, wenn ich nicht einverstanden bin?",
-    a: "Alles unverbindlich. Passt das Angebot nicht, schicken wir dir dein Paket kostenlos zurück.",
-  },
-  {
-    q: "Was kostet der Versand?",
-    a: "Nach deiner Freigabe bekommst du ein kostenloses Versandlabel – für dich entstehen keine Versandkosten.",
-  },
-  {
-    q: "Wie schnell geht das?",
-    a: "In der Regel meldet sich unser Retro-Team innerhalb von 24 Stunden mit der nächsten Info.",
-  },
-];
-
 const HOW_STEPS: { icon: LucideIcon; title: string; text: string }[] = [
-  { icon: Package, title: "1. Zusammenstellen", text: "Such dein Gerät, Spiel oder deine ganze Sammlung." },
-  { icon: Sparkles, title: "2. Wert sehen", text: "Enthülle sofort deinen fairen Richtwert." },
-  { icon: Truck, title: "3. Kostenlos einsenden", text: "Gratis Versandlabel nach deiner Freigabe." },
-  { icon: Wallet, title: "4. Geld kassieren", text: "Aufs Konto – oder als Guthaben mit Bonus." },
+  { icon: Package, title: "Zusammenstellen", text: "Such dein Gerät, Spiel oder deine ganze Sammlung." },
+  { icon: Sparkles, title: "Wert sehen", text: "Enthülle sofort deinen fairen Richtwert." },
+  { icon: Truck, title: "Kostenlos einsenden", text: "Gratis Versandlabel nach deiner Freigabe." },
+  { icon: Wallet, title: "Geld kassieren", text: "Aufs Konto – oder als Guthaben mit Bonus." },
+];
+
+const PROOF_ITEMS: { icon: LucideIcon; title: string; text: string }[] = [
+  {
+    icon: ShieldCheck,
+    title: "Fair & geprüft",
+    text: "Die Schätzung ist ein Richtwert. Dein finales Angebot kommt nach kurzer Prüfung.",
+  },
+  {
+    icon: Truck,
+    title: "Versand geht aufs Haus",
+    text: "Nach deiner Freigabe schicken wir dir ein kostenloses Versandlabel.",
+  },
+  {
+    icon: Wallet,
+    title: "Du entscheidest",
+    text: "Auszahlung aufs Konto – oder als Guthaben mit Extra-Bonus.",
+  },
 ];
 
 export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
@@ -115,38 +79,33 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
       <section ref={estimateRef} id="preisschaetzer" className="ak-funnel-v3-screen">
         <div className="ak-funnel-v3-shell">
           <header className="ak-funnel-v3-hero">
-            <div>
-              <span className="ak-chip">
-                <Sparkles size={14} />
-                Ankauf-Automat
-              </span>
-              <h1 className="ak-display">Was ist dein Retro-Gear wert?</h1>
-              <p>
-                Stell dein Paket zusammen, enthulle den Richtwert und starte danach direkt
-                die unverbindliche Ankauf-Anfrage.
-              </p>
-            </div>
-
-            <div className="ak-funnel-v3-progress" aria-label="Ablauf">
-              <span className={phase === "estimate" ? "is-active" : "is-done"}>
-                <i>1</i>
-                Schatzen
-              </span>
-              <b />
-              <span className={phase === "checkout" ? "is-active" : ""}>
-                <i>2</i>
-                Anfrage
-              </span>
-            </div>
+            <span className="ak-chip">
+              <Sparkles size={14} />
+              RetrOase Ankauf
+            </span>
+            <h1 className="ak-display">Mach dein altes Gaming zu Geld.</h1>
+            <p>
+              Konsole, Spiel oder ganze Sammlung – schätz den Wert in unter einer Minute,
+              sende kostenlos ein und lass dich auszahlen. Du entscheidest am Ende.
+            </p>
+            <ul className="ak-funnel-v3-trust" aria-label="Vorteile">
+              {TRUST_ITEMS.map((item) => (
+                <li key={item}>
+                  <CheckCircle2 size={15} />
+                  {item}
+                </li>
+              ))}
+            </ul>
           </header>
 
           <ol className="ak-funnel-v3-how" aria-label="So funktioniert's">
-            {HOW_STEPS.map((step) => {
+            {HOW_STEPS.map((step, index) => {
               const Icon = step.icon;
               return (
                 <li key={step.title}>
                   <span className="ak-funnel-v3-how-icon">
                     <Icon size={20} />
+                    <i aria-hidden="true">{index + 1}</i>
                   </span>
                   <strong>{step.title}</strong>
                   <span>{step.text}</span>
@@ -154,15 +113,6 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
               );
             })}
           </ol>
-
-          <div className="ak-funnel-v3-trust" aria-label="Vorteile">
-            {TRUST_ITEMS.map((item) => (
-              <span key={item}>
-                <CheckCircle2 size={15} />
-                {item}
-              </span>
-            ))}
-          </div>
 
           <div className="ak-funnel-v3-tool">
             <AnkaufPriceToolV2
@@ -173,63 +123,18 @@ export function AnkaufFunnelV3({ priceCatalog }: AnkaufFunnelV3Props) {
             />
           </div>
 
-          <aside className="ak-funnel-v3-proof" aria-label="Kurzinfo">
-            <div>
-              <ShieldCheck size={18} />
-              <strong>Fair gepruft</strong>
-              <span>Die Schätzung ist ein Richtwert. Das finale Angebot kommt nach kurzer Prufung.</span>
-            </div>
-            <div>
-              <Zap size={18} />
-              <strong>Kein Formular-Marathon</strong>
-              <span>Erst Wert sehen, dann nur noch die Details erganzen, die wir wirklich brauchen.</span>
-            </div>
-            <div>
-              <Lock size={18} />
-              <strong>Fokus-Modus</strong>
-              <span>Nach dem Start verschwindet alles Unwichtige. Nur dein Paket und die Anfrage.</span>
-            </div>
+          <aside className="ak-funnel-v3-proof" aria-label="Gut zu wissen">
+            {PROOF_ITEMS.map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.title}>
+                  <Icon size={18} />
+                  <strong>{item.title}</strong>
+                  <span>{item.text}</span>
+                </div>
+              );
+            })}
           </aside>
-
-          <div className="ak-funnel-v3-stats" aria-label="Zahlen und Fakten">
-            {FUNNEL_STATS.map((stat) => (
-              <div key={stat.label}>
-                <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
-              </div>
-            ))}
-          </div>
-
-          <section className="ak-funnel-v3-social" aria-label="Bewertungen">
-            <header>
-              <span className="ak-funnel-v3-stars" aria-hidden="true">★★★★★</span>
-              <strong>Das sagen Verkäufer über uns</strong>
-            </header>
-            <div className="ak-funnel-v3-reviews">
-              <div className="ak-funnel-v3-reviews-track">
-                {[...FUNNEL_REVIEWS, ...FUNNEL_REVIEWS].map((review, index) => (
-                  <figure
-                    key={`${review.name}-${index}`}
-                    aria-hidden={index >= FUNNEL_REVIEWS.length}
-                  >
-                    <span className="ak-funnel-v3-stars" aria-label="5 von 5 Sternen">★★★★★</span>
-                    <blockquote>{review.text}</blockquote>
-                    <figcaption>{review.name}</figcaption>
-                  </figure>
-                ))}
-              </div>
-            </div>
-          </section>
-
-          <section className="ak-funnel-v3-faq" aria-label="Häufige Fragen">
-            <strong>Häufige Fragen</strong>
-            {FUNNEL_FAQ.map((entry) => (
-              <details key={entry.q}>
-                <summary>{entry.q}</summary>
-                <p>{entry.a}</p>
-              </details>
-            ))}
-          </section>
         </div>
       </section>
 

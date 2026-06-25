@@ -6,6 +6,7 @@ import { TrustBadges } from "@/components/home/TrustBadges";
 import { BasementFomo } from "@/components/home/BasementFomo";
 import { FeaturedProducts } from "@/components/home/FeaturedProducts";
 import { AnkaufTeaser } from "@/components/home/AnkaufTeaser";
+import { SellerProof } from "@/components/home/SellerProof";
 import { NewsletterSignup } from "@/components/home/NewsletterSignup";
 
 export const revalidate = 60;
@@ -49,6 +50,7 @@ export default function HomePage() {
         <FeaturedProducts />
       </Suspense>
       <AnkaufTeaser />
+      <SellerProof />
       <NewsletterSignup />
     </>
   );
