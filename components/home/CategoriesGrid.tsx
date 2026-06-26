@@ -67,7 +67,7 @@ export function CategoriesGrid() {
             return (
               <Link
                 key={cat.id}
-                href={`/shop?category=${encodeURIComponent(cat.label)}`}
+                href={`/shop?category=${cat.id}`}
                 className={`group relative flex flex-col gap-4 p-5 sm:p-6 rounded-2xl border border-border bg-background hover:border-border-strong hover:-translate-y-0.5 hover:shadow-hover transition-all duration-200 min-h-[140px] ${isWide ? "lg:col-span-2" : "lg:col-span-1"}`}
                 style={{ background: `linear-gradient(135deg, ${accent} 0%, var(--background) 60%)` }}
                 aria-label={`${cat.label}: ${cat.description}`}

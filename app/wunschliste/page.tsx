@@ -29,12 +29,21 @@ export default function WunschlistePage() {
       .from("products")
       .select("*")
       .in("id", wishlist)
-      .then(({ data }) => {
+      .then(({ data, error }) => {
+        setFetching(false);
+        // Bei Fehler nichts bereinigen – sonst würde eine gültige Liste
+        // bei einem Netzwerkfehler fälschlich geleert.
+        if (error) return;
+
         const map = new Map((data ?? []).map((p) => [p.id, p as Product]));
         setProducts(wishlist.map((id) => map.get(id)).filter((p): p is Product => !!p));
-        setFetching(false);
+
+        // Geister-IDs (Produkt existiert nicht mehr) automatisch entfernen,
+        // damit der Wunschlisten-Zähler/Badge nicht dauerhaft "hängt".
+        const ghostIds = wishlist.filter((id) => !map.has(id));
+        ghostIds.forEach((id) => toggleWishlist(id));
       });
-  }, [wishlist, isLoaded]);
+  }, [wishlist, isLoaded, toggleWishlist]);
 
   const loading = !isLoaded || fetching;
 

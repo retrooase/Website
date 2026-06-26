@@ -4,6 +4,7 @@ import { useState, useMemo, useEffect } from "react";
 import { SlidersHorizontal, X } from "lucide-react";
 import { clsx } from "clsx";
 import type { Product } from "@/lib/types";
+import { normalizeText, productMatchesCategory, resolveCategorySlug } from "@/lib/categories";
 import { ProductCard } from "./ProductCard";
 import { SearchInput } from "./SearchInput";
 import { SortSelect, type SortOption } from "./SortSelect";
@@ -20,9 +21,14 @@ type Props = {
 export function ShopClient({ products, allPlatforms, initialQuery = "", initialCategory = "" }: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [sort, setSort] = useState<SortOption>("newest");
+  // Eingehenden Kategorie-Wert (Slug ODER Label) auf den kanonischen Slug
+  // normalisieren, damit Matching UND FilterPanel-Checkbox synchron sind.
+  const seededCategory = initialCategory
+    ? resolveCategorySlug(initialCategory) ?? initialCategory
+    : "";
   const [filters, setFilters] = useState<Filters>({
     ...DEFAULT_FILTERS,
-    categories: initialCategory ? [initialCategory] : [],
+    categories: seededCategory ? [seededCategory] : [],
   });
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -35,21 +41,21 @@ export function ShopClient({ products, allPlatforms, initialQuery = "", initialC
     let list = [...products];
 
     if (query.trim()) {
-      // eslint-disable-next-line no-misleading-character-class
-      const norm = (s: string) =>
-        s.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
-      const q = norm(query);
+      const q = normalizeText(query);
       list = list.filter(
         (p) =>
-          norm(p.title).includes(q) ||
-          norm(p.platform ?? "").includes(q) ||
-          norm(p.category).includes(q) ||
-          norm(p.description).includes(q)
+          normalizeText(p.title).includes(q) ||
+          normalizeText(p.platform ?? "").includes(q) ||
+          normalizeText(p.category).includes(q) ||
+          normalizeText(p.description).includes(q)
       );
     }
 
     if (filters.onlyAvailable) list = list.filter((p) => !p.is_sold);
-    if (filters.categories.length > 0) list = list.filter((p) => filters.categories.includes(p.category));
+    if (filters.categories.length > 0)
+      list = list.filter((p) =>
+        filters.categories.some((c) => productMatchesCategory(p, c))
+      );
     if (filters.conditions.length > 0) list = list.filter((p) => filters.conditions.includes(p.condition));
     list = list.filter((p) => p.price >= filters.priceRange[0] && p.price <= filters.priceRange[1]);
     if (filters.platforms.length > 0) list = list.filter((p) => filters.platforms.includes(p.platform));

@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingBag, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { removeFromWishlistLocal } from "@/lib/hooks/useWishlistHybrid";
 import type { Product } from "@/types";
 import { SITE } from "@/lib/constants";
 
@@ -52,14 +53,8 @@ export function WishlistSection({ userId }: Props) {
       .eq("product_id", productId);
     setWishlistProducts((prev) => prev.filter((p) => p.id !== productId));
 
-    try {
-      const raw = localStorage.getItem("retroase_wishlist_v1");
-      const local: string[] = raw ? JSON.parse(raw) : [];
-      localStorage.setItem(
-        "retroase_wishlist_v1",
-        JSON.stringify(local.filter((id) => id !== productId))
-      );
-    } catch {}
+    // localStorage + geteilter Store (Navigation-Badge bleibt synchron)
+    removeFromWishlistLocal(productId);
   }
 
   return (

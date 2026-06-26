@@ -1,33 +1,12 @@
 import Link from "next/link";
 import { SITE, FOOTER_LINKS } from "@/lib/constants";
-import { Mail, ExternalLink } from "lucide-react";
+import { Mail } from "lucide-react";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
     <footer className="bg-surface border-t border-border/60 mt-20 mb-20 lg:mb-0">
-      {/* KaizenDesk Banner */}
-      <div className="border-b border-border/40 bg-surface-hover">
-        <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5">
-          <a
-            href={SITE.kaizenDeskUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center justify-center gap-2.5 group"
-            aria-label="KaizenDesk — Schwestermarke"
-          >
-            <span className="font-sans text-xs text-text-secondary">
-              Neuware & Setup-Zubehör →
-            </span>
-            <span className="font-sans text-xs font-semibold text-accent-gold group-hover:text-accent-orange transition-colors">
-              KaizenDesk.de
-            </span>
-            <ExternalLink size={11} className="text-text-tertiary group-hover:text-accent-orange transition-colors" aria-hidden="true" />
-          </a>
-        </div>
-      </div>
-
       {/* Main Footer */}
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">

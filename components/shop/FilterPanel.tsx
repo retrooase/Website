@@ -2,6 +2,7 @@
 
 import { clsx } from "clsx";
 import { CATEGORIES, CONDITIONS } from "@/lib/constants";
+import { resolveCategorySlug } from "@/lib/categories";
 import { PriceSlider } from "./PriceSlider";
 
 export type Filters = {
@@ -95,9 +96,9 @@ export function FilterPanel({ filters, onChange, allPlatforms, resultCount }: Pr
             <CheckItem
               key={cat.id}
               label={`${cat.icon} ${cat.label}`}
-              checked={filters.categories.includes(cat.label)}
+              checked={filters.categories.some((c) => (resolveCategorySlug(c) ?? c) === cat.id)}
               onChange={() =>
-                onChange({ ...filters, categories: toggleArr(filters.categories, cat.label) })
+                onChange({ ...filters, categories: toggleArr(filters.categories, cat.id) })
               }
             />
           ))}

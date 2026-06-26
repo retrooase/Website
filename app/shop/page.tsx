@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAllProducts } from "@/lib/products";
+import { getCategoryLabel } from "@/lib/categories";
 import { ShopClient } from "@/components/shop/ShopClient";
 
 export const revalidate = 60;
@@ -12,8 +13,9 @@ export async function generateMetadata({
   searchParams: SearchParams;
 }): Promise<Metadata> {
   const cat = searchParams.category;
+  const label = cat ? getCategoryLabel(cat) : "";
   return {
-    title: cat ? `${cat} kaufen` : "Shop — Alle Produkte",
+    title: label ? `${label} kaufen` : "Shop — Alle Produkte",
     description:
       "Geprüfte Retro-Konsolen, Spiele & Pokémon-Karten. Direkt kaufen oder über eBay.",
   };
@@ -22,6 +24,7 @@ export async function generateMetadata({
 export default async function ShopPage({ searchParams }: { searchParams: SearchParams }) {
   const products = await getAllProducts();
   const platforms = Array.from(new Set(products.map((p) => p.platform).filter((p): p is string => Boolean(p))));
+  const categoryLabel = searchParams.category ? getCategoryLabel(searchParams.category) : "";
 
   return (
     <>
@@ -32,11 +35,11 @@ export default async function ShopPage({ searchParams }: { searchParams: SearchP
             className="font-display font-bold text-text-primary mb-2 leading-tight"
             style={{ fontSize: "clamp(1.5rem, 3vw, 2.25rem)" }}
           >
-            {searchParams.category ? searchParams.category : "Alle Produkte"}
+            {categoryLabel || "Alle Produkte"}
           </h1>
           <p className="font-sans text-sm text-text-secondary mb-5 max-w-lg">
-            {searchParams.category
-              ? `Geprüfte Secondhand-Ware · ${searchParams.category} · direkt aus Deutschland.`
+            {categoryLabel
+              ? `Geprüfte Secondhand-Ware · ${categoryLabel} · direkt aus Deutschland.`
               : "Entdecke geprüfte Retro-Schätze — Konsolen, Spiele & Pokémon-Karten direkt aus Deutschland."}
           </p>
 
