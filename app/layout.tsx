@@ -5,6 +5,7 @@ import { Navigation } from "@/components/ui/Navigation";
 import { createServerSupabaseClient, createAdminSupabaseClient } from "@/lib/supabase/server";
 import { isAdminUser } from "@/lib/admin";
 import { Footer } from "@/components/ui/Footer";
+import { ScreenRainGate } from "@/components/ui/ScreenRainGate";
 import { ToastProvider } from "@/components/ui/ToastProvider";
 import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { BackToTop } from "@/components/ui/BackToTop";
@@ -134,7 +135,8 @@ export default function RootLayout({
           <Suspense fallback={<Navigation isAdmin={false} />}>
             <NavWithAuth />
           </Suspense>
-          <main>{children}</main>
+          <ScreenRainGate />
+          <main className="relative z-10">{children}</main>
           <Footer />
           <WhatsAppButton />
           <BackToTop />
