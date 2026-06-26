@@ -11,6 +11,8 @@ import { WhatsAppButton } from "@/components/ui/WhatsAppButton";
 import { BackToTop } from "@/components/ui/BackToTop";
 import { CookieBanner } from "@/components/ui/CookieBanner";
 import { ScrollFadeObserver } from "@/components/ui/ScrollFadeObserver";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
 
 const syne = Syne({
@@ -138,6 +140,8 @@ export default function RootLayout({
           <CookieBanner />
           <ScrollFadeObserver />
         </ToastProvider>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );
