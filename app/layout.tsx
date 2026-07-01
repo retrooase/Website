@@ -14,6 +14,7 @@ import { ScrollFadeObserver } from "@/components/ui/ScrollFadeObserver";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Analytics } from "@vercel/analytics/next";
 import { Suspense } from "react";
+import { organizationSchema, websiteSchema, jsonLdString } from "@/lib/seo";
 
 const syne = Syne({
   weight: ["400", "600", "700", "800"],
@@ -64,25 +65,19 @@ export const metadata: Metadata = {
     title: "RetrOase — Wo Gaming-Träume wahr werden.",
     description:
       "Retro-Gaming Shop aus Deutschland. Geprüfte Secondhand-Konsolen, Spiele, Zubehör und Pokémon-Karten.",
-    images: [
-      {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "RetrOase — Retro Gaming Shop",
-      },
-    ],
   },
   twitter: {
     card: "summary_large_image",
     title: "RetrOase — Wo Gaming-Träume wahr werden.",
     description: "Retro-Gaming Shop aus Deutschland.",
-    images: ["/images/og-image.jpg"],
   },
   robots: {
     index: true,
     follow: true,
     googleBot: { index: true, follow: true },
+  },
+  alternates: {
+    canonical: "/",
   },
 };
 
@@ -128,6 +123,14 @@ export default function RootLayout({
       suppressHydrationWarning
     >
       <body className="bg-background text-text-primary font-sans antialiased">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(organizationSchema()) }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: jsonLdString(websiteSchema()) }}
+        />
         <ToastProvider>
           <Suspense fallback={<Navigation isAdmin={false} />}>
             <NavWithAuth />

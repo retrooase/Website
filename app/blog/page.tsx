@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   title: "Blog — Guides, Tipps & Retro-Wissen",
   description:
     "Retro-Gaming Guides, Kauftipps, Sammlerwissen und News rund um Nintendo, Game Boy, PlayStation und mehr — vom RetrOase Team.",
+  alternates: {
+    canonical: "/blog",
+  },
 };
 
 const CATEGORY_EMOJI: Record<string, string> = {

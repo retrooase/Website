@@ -9,6 +9,8 @@ import { BuyButton } from "@/components/shop/BuyButton";
 import { AddToCartButton } from "@/components/shop/AddToCartButton";
 import { ProductCard } from "@/components/shop/ProductCard";
 import { Breadcrumb } from "@/components/shop/Breadcrumb";
+import { SITE as SEO_SITE } from "@/lib/constants";
+import { productSchema, breadcrumbSchema, jsonLdString } from "@/lib/seo";
 import type { Product } from "@/types";
 
 export const revalidate = 60;
@@ -18,15 +20,31 @@ type Props = { params: { slug: string } };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const product = await getProductBySlug(params.slug);
-  if (!product) return { title: "Produkt nicht gefunden" };
+  if (!product) {
+    return { title: "Produkt nicht gefunden", robots: { index: false, follow: true } };
+  }
+  const description = product.description.slice(0, 160);
   return {
     title: `${product.title} kaufen`,
-    description: product.description.slice(0, 160),
+    description,
+    keywords: [product.title, product.platform, product.category, "gebraucht kaufen", "Retro Gaming"],
+    alternates: {
+      canonical: `/shop/${product.slug}`,
+    },
     openGraph: {
       title: product.title,
-      description: product.description.slice(0, 160),
-      images: product.images[0] ? [{ url: product.images[0] }] : [],
+      description,
+      url: `${SEO_SITE.url}/shop/${product.slug}`,
+      type: "website",
+      images: product.images[0] ? [{ url: product.images[0], width: 800, height: 800, alt: product.title }] : undefined,
     },
+    twitter: {
+      card: "summary_large_image",
+      title: product.title,
+      description,
+      images: product.images[0] ? [product.images[0]] : undefined,
+    },
+    robots: product.is_sold ? { index: false, follow: true } : { index: true, follow: true },
   };
 }
 
@@ -50,6 +68,23 @@ export default async function ProductDetailPage({ params }: Props) {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(productSchema(product)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdString(
+            breadcrumbSchema([
+              { name: "Startseite", url: "/" },
+              { name: "Shop", url: "/shop" },
+              { name: product.category, url: `/shop?category=${encodeURIComponent(product.category)}` },
+              { name: product.title },
+            ])
+          ),
+        }}
+      />
       {/* Breadcrumb */}
       <Breadcrumb
         crumbs={[

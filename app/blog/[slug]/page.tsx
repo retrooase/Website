@@ -4,6 +4,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { getPostBySlug, getRelatedPosts, getAllPostSlugs } from "@/lib/blog";
+import { SITE } from "@/lib/constants";
+import { blogPostingSchema, breadcrumbSchema, jsonLdString } from "@/lib/seo";
 
 export const revalidate = 60;
 
@@ -17,16 +19,29 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
   const post = await getPostBySlug(slug);
-  if (!post) return {};
+  if (!post) return { robots: { index: false, follow: true } };
   return {
     title: post.title,
     description: post.excerpt ?? undefined,
+    keywords: [post.category, ...(post.tags ?? []), "Retro Gaming", "RetrOase"],
+    alternates: {
+      canonical: `/blog/${post.slug}`,
+    },
     openGraph: {
       title: post.title,
       description: post.excerpt ?? undefined,
-      images: post.image ? [{ url: post.image }] : [],
+      url: `${SITE.url}/blog/${post.slug}`,
+      images: post.image ? [{ url: post.image, width: 1200, height: 630, alt: post.title }] : undefined,
       type: "article",
       publishedTime: post.published_at ?? undefined,
+      authors: [SITE.name],
+      tags: post.tags ?? undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: post.title,
+      description: post.excerpt ?? undefined,
+      images: post.image ? [post.image] : undefined,
     },
   };
 }
@@ -46,6 +61,22 @@ export default async function BlogPostPage({ params }: PageProps) {
 
   return (
     <div className="min-h-screen bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdString(blogPostingSchema(post)) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: jsonLdString(
+            breadcrumbSchema([
+              { name: "Startseite", url: "/" },
+              { name: "Blog", url: "/blog" },
+              { name: post.title },
+            ])
+          ),
+        }}
+      />
       {/* Hero */}
       <div className="relative bg-surface border-b border-border">
         {post.image && (

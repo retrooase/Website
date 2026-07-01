@@ -5,9 +5,12 @@ import { AnkaufFunnelV3 } from "@/components/ankauf/v3/AnkaufFunnelV3";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Ankauf - Wert schatzen & verkaufen | RetrOase",
+  title: "Ankauf — Wert schätzen & verkaufen | RetrOase",
   description:
-    "Schatz Konsolen, Spiele, Karten und Sammlungen direkt online. Danach unverbindliche Ankauf-Anfrage mit Fotos und Kontakt absenden.",
+    "Schätze deine Konsolen, Spiele, Karten und Sammlungen kostenlos online. Danach unverbindliche Ankauf-Anfrage mit Fotos und Kontakt absenden.",
+  alternates: {
+    canonical: "/ankauf",
+  },
 };
 
 export default async function AnkaufPage() {
