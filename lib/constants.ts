@@ -32,9 +32,9 @@ export const TEAM = {
     name: "Emir",
     role: "Mitgründer & Bruder von Eren",
   },
-  colleague: {
-    name: "[Kollege]", // Name eintragen
-    role: "Team-Mitglied",
+  ibrahim: {
+    name: "Ibrahim",
+    role: "Mitgründer",
   },
 };
 
